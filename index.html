@@ -1,0 +1,1934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CHIRAG SHETTY P · 24CS1087 · Dayananda Sagar University</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================ TOKENS */
+:root{
+  --paper:#e9e7e0;
+  --ink:#161616;
+  --g1:#c9c7c0;
+  --g2:#8f8d87;
+  --g3:#55534f;
+  --red:#c8281e;
+  --page:#d6d4cc;
+  --flash-w:#f7f5ef;
+  --font-d:'Space Grotesk','Segoe UI',system-ui,sans-serif;
+  --font-m:'JetBrains Mono',ui-monospace,'Cascadia Mono','Courier New',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none !important}
+html{background-color:var(--page)}
+body{
+  min-height:100vh;overflow-x:hidden;
+  background-color:var(--page);
+  background-image:repeating-linear-gradient(0deg,rgba(22,22,22,.022) 0 1px,transparent 1px 6px);
+  font-family:var(--font-m);color:var(--ink);
+  display:grid;place-items:center;padding:26px 0 44px;
+}
+:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+/* ============================================================ LAYOUT */
+.stage{display:grid;justify-items:center;gap:14px;width:100%}
+.scaler{width:340px;height:540px;transform-origin:top center;perspective:1100px}
+
+.card{
+  --s:var(--paper);--t:var(--ink);
+  position:relative;width:340px;height:540px;
+  border:3px solid var(--ink);border-radius:14px;
+  background:var(--s);color:var(--t);
+  overflow:hidden;cursor:pointer;user-select:none;-webkit-user-select:none;
+}
+.card.inv{--s:var(--ink);--t:var(--paper)}
+.bezel{position:absolute;inset:6px;border:1px solid var(--g2);border-radius:8px;pointer-events:none;z-index:8}
+
+.face{position:absolute;inset:0;padding:16px;display:flex;flex-direction:column;z-index:1}
+.face.is-hidden{visibility:hidden}
+
+/* ---- front ---- */
+.statusbar{position:relative;display:flex;justify-content:space-between;align-items:center;height:16px}
+.statusbar .univ{font-size:7px;font-weight:700;letter-spacing:.16em;white-space:nowrap}
+.statusbar .sb-right{display:flex;align-items:center;gap:5px}
+.statusbar .batt{color:var(--t);flex:none}
+.statusbar .clock{font-size:7px;font-weight:500;letter-spacing:.14em;white-space:nowrap}
+
+.marquee{margin-top:12px;height:22px;border-top:1px solid var(--g2);border-bottom:1px solid var(--g2);overflow:hidden;display:flex;align-items:center}
+.mq-track{display:flex;width:max-content;white-space:nowrap;font-size:9px;font-weight:700;letter-spacing:.22em}
+.mq-seq{display:inline-block}
+
+.photo{position:relative;margin-top:16px;height:240px;border:2px solid var(--t)}
+.photo canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
+
+.name{margin-top:20px;font-family:var(--font-d);font-weight:700;font-size:40px;line-height:.95;letter-spacing:-.01em;white-space:nowrap}
+.n-ltr{display:inline-block;text-shadow:1px 1px 0 rgba(22,22,22,.08)}
+.card.inv .n-ltr{text-shadow:1px 1px 0 rgba(233,231,224,.08)}
+.n-sp{display:inline-block;width:.34em}
+
+.idline{margin-top:16px;display:flex;align-items:baseline;gap:10px}
+.idline .lbl{font-size:8px;font-weight:500;letter-spacing:.3em;color:var(--g2);border:1px solid var(--g2);padding:3px 5px 2px;background:repeating-linear-gradient(45deg,var(--g1) 0 1px,transparent 1px 4px)}
+.idline .scr{font-size:17px;font-weight:700;letter-spacing:.12em;text-shadow:1px 1px 0 rgba(22,22,22,.08)}
+.card.inv .idline .scr{text-shadow:1px 1px 0 rgba(233,231,224,.08)}
+.program{margin-top:10px;font-size:8px;font-weight:500;letter-spacing:.18em;color:var(--g2)}
+
+.barcode{margin-top:auto;position:relative;border:1px solid var(--t);padding:6px 8px 4px}
+.bars{display:flex;height:28px}
+.bars .b{display:block;height:100%;background:var(--t)}
+.bars .g{display:block;height:100%}
+.bar-meta{display:flex;justify-content:space-between;margin-top:4px;font-size:6.5px;font-weight:500;letter-spacing:.22em;color:var(--g2)}
+
+/* ---- back ---- */
+.back{justify-content:space-between}
+.bk-head{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--g2);padding-bottom:8px;font-size:7px;font-weight:700;letter-spacing:.16em}
+.bk-head .bk-id{font-size:9px;letter-spacing:.1em}
+.bk-main{display:flex;gap:14px;margin-top:2px}
+.qr-wrap{border:2px solid var(--t);width:104px;height:104px;padding:2px;flex:none}
+.qr-wrap canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
+.bk-info{flex:1;display:flex;flex-direction:column;gap:3px;justify-content:center}
+.lbl{font-size:7px;font-weight:500;letter-spacing:.24em;color:var(--g2)}
+.bk-info .lbl{margin-top:8px}
+.bk-info .lbl:first-child{margin-top:0}
+.val-big{font-family:var(--font-d);font-weight:700;font-size:15px;letter-spacing:.02em}
+.val-mono{font-size:10px;font-weight:500;letter-spacing:.06em}
+.bk-rows{display:flex;gap:10px}
+.row{flex:1;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--g2);padding:7px 9px}
+.row .val-mono{font-weight:700;font-size:10px;letter-spacing:.1em}
+.pill{font-size:7px;font-weight:700;letter-spacing:.18em;padding:3px 6px 2px;border:1px solid var(--t);background:repeating-linear-gradient(45deg,var(--g1) 0 2px,transparent 2px 5px)}
+
+.seal-row{display:grid;place-items:center}
+.seal{width:132px;height:132px;color:var(--t)}
+.seal-txt{font-family:var(--font-m);font-size:9px;font-weight:500;letter-spacing:1.4px;fill:currentColor}
+.seal-k{font-family:var(--font-d);font-weight:700;font-size:23px;letter-spacing:.06em;fill:currentColor}
+.terms{font-size:6.5px;font-weight:500;letter-spacing:.16em;color:var(--g2);text-align:center;line-height:1.8}
+
+/* ---- page controls ---- */
+.controls{display:flex;gap:10px}
+.ctrl{
+  font-family:var(--font-m);font-weight:700;font-size:10px;
+  letter-spacing:.24em;text-indent:.24em;padding:9px 16px 8px;
+  background:var(--paper);color:var(--ink);
+  border:2px solid var(--ink);border-radius:4px;cursor:pointer;
+}
+.ctrl:hover,.ctrl[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.ctrl:active{transform:translate(0,2px)}
+.hint{font-size:7px;font-weight:500;letter-spacing:.3em;color:var(--g3);text-align:center;line-height:1.8}
+
+/* ============================================================ EINK */
+.fx{position:absolute;inset:7px;border-radius:8px;z-index:5;pointer-events:none;overflow:hidden}
+.flash{position:absolute;inset:0;visibility:hidden}
+.flash.ink{visibility:visible;background:var(--ink)}
+.flash.paper{visibility:visible;background:var(--flash-w)}
+.vignette{position:absolute;inset:0;background:radial-gradient(130% 100% at 50% 44%,rgba(22,22,22,0) 60%,rgba(22,22,22,.07) 100%)}
+.noise{position:absolute;inset:0;width:100%;height:100%;opacity:.06}
+
+.rf{position:absolute;inset:-4px -6px;z-index:4;pointer-events:none;visibility:hidden}
+.rf.ink{visibility:visible;background:var(--ink)}
+.rf.paper{visibility:visible;background:var(--flash-w)}
+
+.stamp{
+  position:absolute;right:8px;bottom:-16px;z-index:3;
+  padding:5px 10px 4px;border:3px solid var(--red);color:var(--red);
+  font:700 15px/1 var(--font-d);letter-spacing:.28em;text-indent:.28em;
+  opacity:0;transform:rotate(-8deg) scale(1);
+  mix-blend-mode:multiply;
+}
+.card.inv .stamp{mix-blend-mode:screen}
+.stamp.on{animation:stampIn .48s steps(3,end) both}
+@keyframes stampIn{
+  0%{opacity:0;transform:rotate(-8deg) scale(2.1)}
+  100%{opacity:1;transform:rotate(-8deg) scale(1)}
+}
+
+/* ============================================================ KINETIC */
+.mq-track{animation:mq var(--mq-dur,13s) steps(var(--mq-steps,325),end) infinite}
+@keyframes mq{to{transform:translateX(calc(-1 * var(--mq-dist,1300px)))}}
+
+.scanline{
+  position:absolute;top:6px;left:8px;width:2px;height:28px;
+  background:var(--t);z-index:2;
+  animation:scan 4s steps(70,end) infinite;
+}
+@keyframes scan{
+  0%{transform:translateX(0);opacity:1}
+  72%{transform:translateX(280px);opacity:1}
+  73%{transform:translateX(280px);opacity:0}
+  96%{transform:translateX(280px);opacity:0}
+  97%{transform:translateX(0);opacity:0}
+  100%{transform:translateX(0);opacity:1}
+}
+
+.seal-rot{transform-box:view-box;transform-origin:50% 50%;animation:sealSpin 21s steps(12,end) infinite}
+@keyframes sealSpin{to{transform:rotate(360deg)}}
+
+.n-ltr.in-L{animation:inL .56s steps(8,end) backwards}
+.n-ltr.in-R{animation:inR .56s steps(8,end) backwards}
+@keyframes inL{0%{transform:translateX(-26px);opacity:0}100%{transform:translateX(0);opacity:1}}
+@keyframes inR{0%{transform:translateX(26px);opacity:0}100%{transform:translateX(0);opacity:1}}
+
+.tilt{transition:transform .16s steps(2,end)}
+
+/* ============================================================ SIM */
+/* page head + bench */
+.sim-head{text-align:center;margin-bottom:2px}
+.sim-title{font-family:var(--font-d);font-weight:700;font-size:15px;letter-spacing:.14em}
+.sim-title .thin{color:var(--g3);font-weight:500}
+.sim-legend{font-size:7px;font-weight:500;letter-spacing:.22em;color:var(--g3);margin-top:5px;line-height:1.9}
+.bench{display:grid;grid-template-columns:340px minmax(260px,330px);gap:16px;justify-content:center;align-items:start;width:100%}
+.card-col{display:grid;justify-items:center;gap:12px;min-width:0}
+.slide{position:relative;z-index:3}
+.side-col{display:grid;gap:10px;min-width:0}
+@media (max-width:760px){
+  .bench{grid-template-columns:minmax(0,1fr);justify-items:center}
+  .side-col{width:min(340px,100%)}
+}
+
+/* panels */
+.panel{border:3px double var(--ink);background:var(--paper);padding:10px 12px;color:var(--ink)}
+.panel-head{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:8px;font-weight:700;letter-spacing:.24em;margin-bottom:8px}
+.sim-tag{font-size:5.5px;font-weight:700;letter-spacing:.18em;color:var(--paper);background:var(--ink);padding:2px 5px 1px;white-space:nowrap}
+.mini{font-size:6.5px;font-weight:500;letter-spacing:.14em;color:var(--g3)}
+.syswrap,.simwrap,.logwrap{width:min(712px,100%)}
+
+/* readouts */
+.readouts{display:grid;grid-template-columns:auto 1fr;gap:5px 10px;font-size:9px}
+.readouts dt{font-size:7px;font-weight:700;letter-spacing:.2em;color:var(--g3);align-self:center}
+.readouts dd{font-weight:700;letter-spacing:.06em;min-width:0}
+.readouts dd .mini{display:inline}
+#ro-state.hot,#ro-net.off,#ro-batt.lowtext{color:var(--red)}
+
+/* reader */
+.reader{display:flex;align-items:center;gap:8px;border:1px solid var(--ink);padding:8px;min-height:30px;
+  background:repeating-linear-gradient(45deg,var(--g1) 0 2px,transparent 2px 6px)}
+.reader-led{width:9px;height:9px;border:1px solid var(--ink);background:var(--paper);flex:none}
+.reader-led.amber{background:repeating-linear-gradient(45deg,var(--g3) 0 1px,var(--paper) 1px 3px)}
+.reader-led.ok{background:var(--ink)}
+.reader-led.bad{background:var(--red)}
+.reader-lcd{flex:1;font-size:8px;font-weight:700;letter-spacing:.12em;background:var(--paper);border:1px solid var(--g2);padding:5px 6px 4px;min-width:0}
+.reader-lcd.bad{color:var(--red);border-color:var(--red)}
+.reader-coil{width:18px;height:18px;border:1px dashed var(--g3);flex:none}
+.mode-row{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+
+/* buttons */
+.mode,.sbtn,.fold{font-family:var(--font-m);font-size:7px;font-weight:700;letter-spacing:.14em;text-indent:.14em;padding:5px 8px 4px;background:var(--paper);color:var(--ink);border:1px solid var(--ink);cursor:pointer;text-transform:uppercase}
+.sbtn{font-size:8px;padding:6px 9px 5px}
+.mode.on,.sbtn.primary,.sbtn[aria-pressed="true"],.fold{letter-spacing:.18em}
+.mode.on,.sbtn.primary{background:var(--ink);color:var(--paper)}
+.sbtn[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.sbtn.on{background:var(--ink);color:var(--paper)}
+.btn-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+
+/* component detail */
+.detail{font-size:8px;line-height:1.75;letter-spacing:.04em}
+.detail-empty{color:var(--g3);font-size:7.5px;letter-spacing:.1em;line-height:1.9}
+.d-name{font-family:var(--font-d);font-weight:700;font-size:12px;letter-spacing:.04em}
+.d-sub{font-size:7px;font-weight:700;letter-spacing:.2em;color:var(--g3);margin:1px 0 6px}
+.d-row{display:grid;grid-template-columns:72px 1fr;gap:2px 8px;margin-top:3px}
+.d-k{font-size:6.5px;font-weight:700;letter-spacing:.18em;color:var(--g3);padding-top:2px}
+.d-pin{border-top:1px solid var(--g2);margin-top:7px;padding-top:6px;font-size:7.5px;letter-spacing:.06em}
+.d-pin .d-k{margin-bottom:2px}
+
+/* bom */
+.bom{width:100%;border-collapse:collapse;font-size:7.5px}
+.bom th,.bom td{border:1px solid var(--g2);padding:4px 6px 3px;text-align:left;letter-spacing:.08em}
+.bom th{font-size:6.5px;color:var(--g3);letter-spacing:.16em}
+.bom .tot td{border-top:2px solid var(--ink);font-weight:700}
+
+/* system view */
+.sys-body{width:100%}
+.syssvg{width:100%;height:auto;display:block}
+.syssvg .sys-box rect{fill:var(--paper);stroke:var(--ink);stroke-width:1.5}
+.syssvg .sys-box .bname{font-size:8.5px;font-weight:700;letter-spacing:.1em;fill:var(--ink);text-anchor:middle}
+.syssvg .sys-box .bsub{font-size:5.5px;letter-spacing:.12em;fill:var(--g3);text-anchor:middle}
+.syssvg .sys-link{stroke:var(--ink);stroke-width:1.5;fill:none}
+.syssvg .sys-link.net{stroke-dasharray:4 3}
+.syssvg .llbl{font-size:5.5px;letter-spacing:.12em;fill:var(--g3)}
+.syssvg .pkt{fill:var(--ink)}
+.syssvg .pkt.bad{fill:var(--red)}
+
+/* state strip */
+.state-strip{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:2px}
+.state-node{font-family:var(--font-m);font-size:7px;font-weight:700;letter-spacing:.12em;text-indent:.12em;border:1px solid var(--ink);padding:5px 7px 4px;color:var(--g3);background:var(--paper)}
+.state-node.active{background:var(--ink);color:var(--paper);border-color:var(--red);outline:1px solid var(--red)}
+
+/* admin form / token / battery */
+.admin-form{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;border:1px solid var(--g2);padding:9px;align-items:end}
+.admin-form label{display:grid;gap:3px;font-size:6.5px;font-weight:700;letter-spacing:.18em;color:var(--g3)}
+.admin-form input{font-family:var(--font-m);font-size:10px;font-weight:700;letter-spacing:.08em;border:1px solid var(--ink);background:var(--paper);color:var(--ink);padding:5px 6px 4px;width:76px}
+.admin-form input:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
+.token-row{display:flex;justify-content:space-between;gap:8px;margin-top:10px;border:1px dashed var(--g3);padding:5px 7px 4px}
+.batt-row{display:flex;align-items:center;gap:10px;margin-top:10px}
+input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:16px;background:transparent;cursor:pointer;min-width:0}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border:1px solid var(--ink);background:repeating-linear-gradient(90deg,var(--g1) 0 2px,transparent 2px 5px)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:10px;height:16px;background:var(--ink);border:1px solid var(--ink);margin-top:-6px}
+input[type=range]::-moz-range-track{height:6px;border:1px solid var(--ink);background:var(--g1)}
+input[type=range]::-moz-range-thumb{width:10px;height:16px;background:var(--ink);border:none;border-radius:0}
+
+/* event log */
+.loglines{font-size:8px;line-height:1.9;letter-spacing:.06em;height:118px;overflow-y:auto;border:1px solid var(--g2);padding:6px 8px}
+.log-line.alert{color:var(--red);font-weight:700}
+
+/* hardware x-ray face */
+.hw-head{display:flex;justify-content:space-between;align-items:center}
+.hw-title{font-size:9px;font-weight:700;letter-spacing:.3em}
+.hw-hint{font-size:6.5px;font-weight:500;letter-spacing:.2em;color:var(--g3);margin-top:3px}
+.hwsvg{width:100%;height:auto;margin-top:7px;display:block;pointer-events:none}
+.hwsvg .wire{fill:none;stroke:var(--g3);stroke-width:1.25}
+.hwsvg .wire.power{stroke:var(--t);stroke-width:2}
+.hwsvg .wire.spi{stroke:var(--t);stroke-width:1.25}
+.hwsvg .wire.i2c{stroke:var(--t);stroke-width:1.25;stroke-dasharray:4 2}
+.hwsvg .wire.hot,.hwsvg .wire.hi{stroke:var(--red)}
+.hwsvg .comp{cursor:pointer}
+.hwsvg .comp .hit{fill:transparent;stroke:none;pointer-events:all}
+.hwsvg .comp rect.box{fill:var(--s);stroke:var(--t);stroke-width:1.5}
+.hwsvg .comp text{fill:var(--t)}
+.hwsvg .cname{font-size:7px;font-weight:700;letter-spacing:.1em;text-anchor:middle}
+.hwsvg .csub{font-size:5px;letter-spacing:.1em;fill:var(--g3);text-anchor:middle}
+.hwsvg .pinlbl{font-size:4.6px;letter-spacing:.02em;fill:var(--g3);text-anchor:middle}
+.hwsvg .tagloop{fill:none;stroke:var(--t);stroke-width:1;stroke-dasharray:3 3}
+.hwsvg .ghostrect{fill:none;stroke:var(--g2);stroke-width:1}
+.hwsvg .stub{stroke:var(--t);stroke-width:1}
+.hwsvg .c-wifi{fill:none;stroke:var(--t);stroke-width:1.25}
+.hwsvg .c-wifi.hot,.hwsvg g.hot .c-wifi{stroke:var(--red)}
+.syssvg .simchip{font-size:5px;font-weight:700;letter-spacing:.1em;fill:var(--paper);text-anchor:middle}
+.ghostlayer{position:absolute;inset:0;opacity:0;background:var(--flash-w);pointer-events:none}
+.hwsvg .dim{opacity:.26}
+.hwsvg .comp.hot rect.box{stroke:var(--red)}
+.hwsvg .comp.hot text.cname{fill:var(--red)}
+.hwsvg .comp.sel rect.box{stroke:var(--red);stroke-dasharray:4 2}
+.hw-legend{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:8px;font-size:6.5px;font-weight:700;letter-spacing:.14em;color:var(--g3);align-items:center}
+.sw{display:inline-block;width:16px;height:0;border-top:2.5px solid var(--ink);vertical-align:middle;margin-right:4px}
+.sw-spi{border-top-width:1.5px}
+.sw-i2c{border-top:1.5px dashed var(--ink)}
+.card.inv .sw,.card.inv .sw-spi,.card.inv .sw-i2c{border-top-color:var(--paper)}
+.hw-note{margin-top:6px}
+.hw-mode{margin-top:4px;font-size:6.5px;font-weight:700;letter-spacing:.2em;color:var(--g3)}
+.hw-mode.hot{color:var(--red)}
+
+/* stamp / battery states */
+.stamp.off{color:var(--g3);border-color:var(--g3);background:repeating-linear-gradient(45deg,var(--g1) 0 2px,transparent 2px 5px)}
+.lowbatt{display:none;font-size:6.5px;font-weight:700;letter-spacing:.14em;color:var(--red)}
+.lowbatt.on{display:inline}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none !important;transition:none !important}
+  .stamp{opacity:1 !important;transform:rotate(-8deg) scale(1) !important}
+  .scanline{display:none}
+}
+</style>
+</head>
+<body>
+<main class="stage">
+  <header class="sim-head">
+    <h2 class="sim-title">DSU E-INK BADGE <span class="thin">· HARDWARE SIMULATION</span></h2>
+    <p class="sim-legend">REAL IN FINAL SYSTEM: E-INK PANEL · ESP32-S3 · PN532 · BATTERY&nbsp;&nbsp;—&nbsp;&nbsp;SIMULATED NOW: READER · NETWORK · GATEWAY · BACKEND</p>
+  </header>
+
+  <div class="bench">
+  <div class="card-col">
+  <div class="scaler" id="scaler">
+    <div class="slide" id="slide">
+    <div class="tilt" id="tilt">
+      <div class="card" id="card" role="button" tabindex="0"
+           aria-label="Student ID card, CHIRAG SHETTY P, 24CS1087. Showing front side. Activate to flip.">
+
+        <!-- ================= FRONT ================= -->
+        <section class="face front" aria-label="Card front">
+          <div class="statusbar" id="statusbar">
+            <span class="univ">DAYANANDA SAGAR UNIVERSITY</span>
+            <span class="sb-right">
+              <svg class="batt" width="15" height="9" viewBox="0 0 15 9" aria-hidden="true" focusable="false">
+                <rect x="0.5" y="0.5" width="11" height="8" fill="none" stroke="currentColor"/>
+                <rect x="12.5" y="2.5" width="2" height="4" fill="currentColor"/>
+                <rect class="bbar" x="2" y="2" width="2" height="5" fill="currentColor"/>
+                <rect class="bbar" x="4.5" y="2" width="2" height="5" fill="currentColor"/>
+                <rect class="bbar" x="7" y="2" width="2" height="5" fill="currentColor"/>
+              </svg>
+              <span class="lowbatt" id="lowbatt">LOW BATT</span>
+              <span class="clock" id="clock">REFRESHED --:--</span>
+            </span>
+            <span class="rf" aria-hidden="true"></span>
+          </div>
+
+          <div class="marquee" aria-hidden="true">
+            <div class="mq-track">
+              <span class="mq-seq">STUDENT • ACTIVE • 24CS1087 • B.TECH CSE • STUDENT • ACTIVE • 24CS1087 • B.TECH CSE • </span>
+              <span class="mq-seq">STUDENT • ACTIVE • 24CS1087 • B.TECH CSE • STUDENT • ACTIVE • 24CS1087 • B.TECH CSE • </span>
+            </div>
+          </div>
+
+          <div class="photo">
+            <canvas id="portrait" width="176" height="140" role="img" aria-label="Dithered e-ink portrait of Chirag Shetty P"></canvas>
+            <div class="stamp" id="stamp">ACTIVE</div>
+          </div>
+
+          <h1 class="name" id="name">CHIRAG SHETTY P</h1>
+
+          <div class="idline">
+            <span class="lbl" aria-hidden="true">ID</span>
+            <span class="scr" data-scramble="24CS1087" aria-label="Student ID 24CS1087"><span class="scr-inner" aria-hidden="true">24CS1087</span></span>
+          </div>
+          <div class="program" id="prog-line">B.TECH COMPUTER SCIENCE · BATCH 2024-28 · SEM 5</div>
+
+          <div class="barcode" role="img" aria-label="Barcode strip encoding student ID 24CS1087">
+            <div class="bars" id="bars" aria-hidden="true"></div>
+            <div class="scanline" aria-hidden="true"></div>
+            <div class="bar-meta" aria-hidden="true"><span>ID-CODE · 39</span><span>SCAN AT GATE</span></div>
+          </div>
+        </section>
+
+        <!-- ================= BACK ================= -->
+        <section class="face back is-hidden" aria-label="Card back">
+          <div class="bk-head">
+            <span>DAYANANDA SAGAR UNIVERSITY</span>
+            <span class="bk-id">ID&nbsp;<span class="scr" data-scramble="24CS1087" aria-label="Student ID 24CS1087"><span class="scr-inner" aria-hidden="true">24CS1087</span></span></span>
+          </div>
+
+          <div class="bk-main">
+            <div class="qr-wrap" role="img" aria-label="Procedural QR-style verification code">
+              <canvas id="qr" width="25" height="25" aria-hidden="true"></canvas>
+            </div>
+            <div class="bk-info">
+              <p class="lbl">EMERGENCY CONTACT</p>
+              <p class="val-big">R. MEHTA</p>
+              <p class="val-mono">+91 98104 21087</p>
+              <p class="lbl">BLOOD GROUP</p>
+              <p class="val-big"><span class="scr" data-scramble="O+" aria-label="Blood group O positive"><span class="scr-inner" aria-hidden="true">O+</span></span></p>
+            </div>
+          </div>
+
+          <div class="bk-rows">
+            <div class="row"><span class="lbl">VALID TILL</span><span class="val-mono"><span class="scr" data-scramble="06/2028" aria-label="Valid till June 2028"><span class="scr-inner" aria-hidden="true">06/2028</span></span></span></div>
+            <div class="row"><span class="lbl">BATCH</span><span class="val-mono">2024-28</span></div>
+          </div>
+
+          <div class="bk-rows">
+            <div class="row"><span class="lbl">SEMESTER</span><span class="val-mono"><span class="scr" id="sem-val" data-scramble="5" aria-label="Semester 5"><span class="scr-inner" aria-hidden="true">5</span></span></span></div>
+            <div class="row"><span class="lbl">ATTENDANCE</span><span class="val-mono"><span class="scr" id="att-val" data-scramble="92%" aria-label="Attendance 92 percent"><span class="scr-inner" aria-hidden="true">92%</span></span></span></div>
+          </div>
+
+          <div class="bk-rows">
+            <div class="row"><span class="lbl">EXAM HALL</span><span class="val-mono"><span class="scr" id="hall-val" data-scramble="H-204" aria-label="Exam hall H-204"><span class="scr-inner" aria-hidden="true">H-204</span></span></span></div>
+            <div class="row"><span class="lbl">SEAT NO</span><span class="val-mono"><span class="scr" id="seat-val" data-scramble="A-07" aria-label="Seat A-07"><span class="scr-inner" aria-hidden="true">A-07</span></span></span></div>
+          </div>
+
+          <div class="bk-rows">
+            <div class="row"><span class="lbl">LIBRARY ACCESS</span><span class="pill">GRANTED</span></div>
+            <div class="row"><span class="lbl">HOSTEL · H-BLK R-447</span><span class="pill">24×7 VALID</span></div>
+          </div>
+
+          <div class="seal-row">
+            <svg class="seal" viewBox="0 0 140 140" role="img" aria-label="Dayananda Sagar University seal">
+              <defs>
+                <path id="sealCirc" d="M70 70 m -51 0 a 51 51 0 1 1 102 0 a 51 51 0 1 1 -102 0"/>
+              </defs>
+              <circle cx="70" cy="70" r="67" fill="none" stroke="currentColor" stroke-width="1.5"/>
+              <circle cx="70" cy="70" r="59" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="2 5"/>
+              <g class="seal-rot" aria-hidden="true">
+                <text class="seal-txt"><textPath href="#sealCirc">DAYANANDA SAGAR UNIVERSITY • EST. 2014 • </textPath></text>
+              </g>
+              <rect x="54" y="46" width="32" height="1.5" fill="currentColor" aria-hidden="true"/>
+              <text x="70" y="76" text-anchor="middle" class="seal-k">DSU</text>
+              <rect x="54" y="82" width="32" height="1.5" fill="currentColor" aria-hidden="true"/>
+            </svg>
+          </div>
+
+          <p class="terms">IF FOUND, RETURN TO THE REGISTRAR · THIS CARD REMAINS PROPERTY OF DAYANANDA SAGAR UNIVERSITY · E-INK VER 2.4</p>
+        </section>
+
+        <!-- ================= HARDWARE X-RAY ================= -->
+        <section class="face hw is-hidden" aria-label="Hardware x-ray of the card">
+          <div class="hw-head">
+            <span class="hw-title">HARDWARE X-RAY</span>
+            <span class="sim-tag">SIMULATED VIEW</span>
+          </div>
+          <p class="hw-hint">HOVER: TRACE WIRES · CLICK: DETAILS + PIN MAP</p>
+          <svg id="hwsvg" class="hwsvg" viewBox="0 0 302 340" role="img"
+               aria-label="Blueprint of card hardware: ESP32-S3 controller, e-ink display, PN532 NFC, Li-Po battery, TP4056 charger, 3.3V regulator, passive NFC tag"></svg>
+          <div class="hw-legend" aria-hidden="true">
+            <span><i class="sw sw-power"></i>POWER 3V3 / GND</span>
+            <span><i class="sw sw-spi"></i>SPI DISPLAY BUS</span>
+            <span><i class="sw sw-i2c"></i>I2C NFC BUS</span>
+          </div>
+          <p class="hw-note mini">EXAMPLE MAPPING — VERIFY AGAINST YOUR BOARD</p>
+          <div class="hw-mode" id="hwMode">MODE: IDLE · —</div>
+        </section>
+
+        <!-- screen fx layers -->
+        <div class="fx" aria-hidden="true">
+          <div class="flash" id="flash"></div>
+          <div class="ghostlayer" id="ghost"></div>
+          <div class="vignette"></div>
+          <svg class="noise" aria-hidden="true" focusable="false">
+            <filter id="grain">
+              <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/>
+              <feColorMatrix type="saturate" values="0"/>
+            </filter>
+            <rect width="100%" height="100%" filter="url(#grain)"/>
+          </svg>
+        </div>
+        <div class="bezel" aria-hidden="true"></div>
+      </div>
+    </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="ctrl" id="btnRefresh" type="button" aria-label="Refresh the e-ink display">REFRESH</button>
+    <button class="ctrl" id="btnInvert" type="button" aria-pressed="false" aria-label="Invert display to ink background with paper text">INVERT</button>
+    <button class="ctrl" id="btnHardware" type="button" aria-label="Show the hardware x-ray face">HARDWARE</button>
+  </div>
+  <p class="hint">E-INK BADGE · DSU REV 2.4<br>CLICK CARD OR SPACE / ENTER — CYCLE FACES · X-RAY: CLICK A PART</p>
+  </div><!-- /card-col -->
+
+  <aside class="side-col">
+    <div class="panel">
+      <div class="panel-head"><span>LIVE READOUT</span><span class="sim-tag">SIMULATED</span></div>
+      <dl class="readouts">
+        <dt>STATE</dt><dd id="ro-state">DEEP SLEEP</dd>
+        <dt>BATTERY</dt><dd id="ro-batt">87%</dd>
+        <dt>NETWORK</dt><dd id="ro-net">ONLINE</dd>
+        <dt>LAST REFRESH</dt><dd id="ro-last">--:--</dd>
+        <dt>CURRENT DRAW</dt><dd id="ro-draw">≈ 10 µA <span class="mini">(ILLUSTRATIVE, NOT MEASURED)</span></dd>
+        <dt>REFRESHES</dt><dd id="ro-count">0</dd>
+        <dt>EST. BATT LIFE</dt><dd id="ro-life">≈ 22.7 DAYS <span class="mini">@ 12 SYNC/DAY · ILLUSTRATIVE</span></dd>
+      </dl>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><span>PN532 GATE READER</span><span class="sim-tag">SIMULATED</span></div>
+      <div class="reader" id="reader">
+        <span class="reader-led" id="readerLed" aria-hidden="true"></span>
+        <span class="reader-lcd" id="readerLcd">READY</span>
+        <span class="reader-coil" aria-hidden="true"></span>
+      </div>
+      <div class="mode-row" role="group" aria-label="NFC mode">
+        <button class="mode on" data-mode="ATTENDANCE" type="button">ATTENDANCE</button>
+        <button class="mode" data-mode="LIBRARY" type="button">LIBRARY</button>
+        <button class="mode" data-mode="CAMPUS" type="button">CAMPUS</button>
+      </div>
+      <div class="btn-row">
+        <button class="sbtn" id="btnTap" type="button">NFC TAP → READER</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><span>COMPONENT DETAIL</span><span class="mini" id="detailTag">CLICK A PART</span></div>
+      <div class="detail" id="detail">
+        <p class="detail-empty">OPEN THE HARDWARE X-RAY FACE, THEN CLICK A COMPONENT FOR PURPOSE, VOLTAGE, INTERFACE, COST AND PIN MAP.</p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <button class="fold" id="btnBom" type="button" aria-expanded="false">BILL OF MATERIALS ▸</button>
+        <span class="sim-tag">SIMULATED</span>
+      </div>
+      <table class="bom" id="bom" hidden></table>
+    </div>
+  </aside>
+  </div><!-- /bench -->
+
+  <section class="panel syswrap">
+    <div class="panel-head">
+      <button class="fold" id="btnSys" type="button" aria-expanded="true">SYSTEM VIEW ▾</button>
+      <span class="sim-tag">READER · NETWORK · GATEWAY · BACKEND SIMULATED</span>
+    </div>
+    <div class="sys-body" id="sysBody">
+      <svg id="syssvg" class="syssvg" viewBox="0 0 660 170" role="img"
+           aria-label="System flow: admin dashboard to backend and database to Raspberry Pi gateway over Wi-Fi to the ESP32-S3 badge and e-ink display; NFC reader to backend to verified result"></svg>
+    </div>
+  </section>
+
+  <section class="panel simwrap">
+    <div class="panel-head"><span>PROTOTYPE CONTROL · STATE MACHINE</span><span class="sim-tag">SIMULATED</span></div>
+    <div class="state-strip" id="stateStrip" aria-label="Card state machine"></div>
+    <div class="btn-row scenarios">
+      <button class="sbtn" id="btnSync" type="button">ADMIN SYNC</button>
+      <button class="sbtn" id="btnScan" type="button">SCAN GATE CODE</button>
+      <button class="sbtn" id="btnTamper" type="button">TAMPER</button>
+      <button class="sbtn" id="btnOffline" type="button" aria-pressed="false">GO OFFLINE</button>
+      <button class="sbtn" id="btnDeact" type="button" aria-pressed="false">DEACTIVATE CARD</button>
+      <button class="sbtn on" id="btnPresent" type="button">PRESENTER MODE</button>
+    </div>
+    <form class="admin-form" id="adminForm" hidden>
+      <label>SEMESTER<input id="afSem" maxlength="4" value="6" autocomplete="off"></label>
+      <label>ATTENDANCE %<input id="afAtt" maxlength="3" value="95" autocomplete="off"></label>
+      <label>EXAM HALL<input id="afHall" maxlength="8" value="H-210" autocomplete="off"></label>
+      <label>SEAT<input id="afSeat" maxlength="5" value="B-12" autocomplete="off"></label>
+      <span class="btn-row">
+        <button class="sbtn primary" id="afRun" type="button">APPLY & SYNC</button>
+        <button class="sbtn" id="afCancel" type="button">CANCEL</button>
+      </span>
+    </form>
+    <div class="token-row">
+      <span class="mini" id="tokenLbl">GATE TOKEN —</span>
+      <span class="mini" id="tokenTtl">T-30s</span>
+    </div>
+    <div class="batt-row">
+      <label class="mini" for="battSlider">BATTERY %</label>
+      <input type="range" id="battSlider" min="0" max="100" value="87" step="1" aria-label="Simulated battery percentage">
+      <span class="mini" id="battVal">87%</span>
+    </div>
+  </section>
+
+  <section class="panel logwrap">
+    <div class="panel-head"><span>EVENT LOG</span><span class="mini">LOCAL ONLY · SIMULATED</span></div>
+    <div class="loglines" id="logPanel" role="log" aria-label="Event log"></div>
+  </section>
+</main>
+
+<script>
+/* ============================================================ TOKENS */
+// studentData: one object holding every field displayed on the card.
+const studentData = {
+  name: 'CHIRAG SHETTY P',
+  id: '24CS1087',
+  program: 'B.TECH COMPUTER SCIENCE',
+  batch: '2024-28',
+  valid: '06/2028',
+  blood: 'O+',
+  university: 'DAYANANDA SAGAR UNIVERSITY',
+  semester: '5',
+  attendance: '92',
+  examHall: 'H-204',
+  seat: 'A-07',
+  active: true
+};
+const DEVICE_ID = 'CARD-24CS1087';
+const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const GLYPHS = '0123456789ABCDEF/#$%&@+';
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => Array.from(document.querySelectorAll(s));
+const wait = (ms) => new Promise((r) => window.setTimeout(r, ms));
+const letters = [];              // per-letter name spans
+let INV = false;                  // inverted mode
+let FACE = 'front';               // visible face: front | back | hw
+const FACES = ['front', 'back', 'hw'];
+let flashing = false;             // e-ink refresh in progress
+
+// deterministic PRNG (mulberry32) for barcode / QR pattern
+function mulberry32(a){
+  return function(){
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+const snapDeg = (v) => Math.max(-6, Math.min(6, Math.round(v / 2) * 2)); // 2° increments, ±6° max
+const clamp01 = (v) => Math.max(0, Math.min(1, v));
+
+/* ============================================================ LAYOUT */
+// split the name into per-letter spans (alternating slide-in directions)
+function buildName(){
+  const host = $('#name');
+  const text = host.textContent.trim();
+  host.textContent = '';
+  const words = text.split(' ');
+  words.forEach((w, wi) => {
+    for (const ch of w){
+      const s = document.createElement('span');
+      s.className = 'n-ltr ' + (letters.length % 2 ? 'in-R' : 'in-L');
+      s.style.animationDelay = (letters.length * 60) + 'ms';
+      s.textContent = ch;
+      host.appendChild(s);
+      letters.push(s);
+    }
+    if (wi < words.length - 1){
+      const sp = document.createElement('span');
+      sp.className = 'n-sp';
+      host.appendChild(sp);
+    }
+  });
+}
+
+// procedural barcode: seeded bar/gap widths totalling <= 280px
+function buildBarcode(){
+  const host = $('#bars');
+  const rng = mulberry32(241087);
+  const frag = document.createDocumentFragment();
+  let total = 0;
+  while (total < 274){
+    const w = 1 + Math.floor(rng() * 3);
+    const g = 1 + Math.floor(rng() * 3);
+    const b = document.createElement('span');
+    b.className = 'b'; b.style.width = w + 'px';
+    const u = document.createElement('span');
+    u.className = 'g'; u.style.width = g + 'px';
+    frag.appendChild(b); frag.appendChild(u);
+    total += w + g;
+  }
+  host.appendChild(frag);
+}
+
+// auto-fit the one-line giant name to the card width (long names shrink cleanly)
+function fitName(){
+  const host = $('#name');
+  let fs = 40;
+  host.style.fontSize = fs + 'px';
+  while (host.scrollWidth > host.clientWidth && fs > 15){
+    fs -= 1;
+    host.style.fontSize = fs + 'px';
+  }
+}
+
+// e-ink portrait: cover-fit the embedded photo, greyscale + mild contrast,
+// then Bayer 4x4 ordered dithering down to 4 grey levels.
+// Source photo is pre-cropped and tone-normalized (face percentiles), so the
+// shipped curve just adds punch. Data URI keeps the canvas untainted (file://).
+const PHOTO_SRC = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwQDAwQEBAQFBQQFBwsHBwYGBw4KCggLEA4RERAOEA8SFBoWEhMYEw8QFh8XGBsbHR0dERYgIh8cIhocHRz/wAALCAEYAWABAREA/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/9oACAEBAAA/APuyng0tFOpyDmpKKKUUuKKKMU4UYopwFFFFNHWnUUUmaWiiimmilIphGKAKXFJmmke1OpM0tFIaaTiqlOoBpRTxTgeacW4pMml3Y7Ub+9Kr560+inUUhORQD60/NJmlpCaYXVepqM3cYOC4/OpElWToQakpAKWikPWkBJpSKToaWkoopuKKKKCKKaTzSNyKqUoPrRmnClBxTgaXNGeaWmnrT1x3pS3elVjTtxpQc07GaaxC9Tim+cp43Cl3DrkUjzhR1GazbrV4rVWaRwoXkknAArw/xp+0XpVndXGnaE9tfXcK7pJppvLt09QG6sfpx715Pqn7UV9Y3oidLaeR2VVgtY5DnPdXJ5/KptN/bGm8Paoy63pMz6azgjMZhmRT6EnDYPrjOetfVPhn4kaH4r8O2euaXeJcWF0m5HHBB7qw7MDwRWhZeL9PvbgQJNH5jHAXcMk+3rW4tzG3G7B9DUmRQaAaDRnNIaKKKTNNNANKKUmkppGKKp03NOpw606gU6gUGilHSlp4GBS0oOBVW81GO0jZ3IAAzkmvl74l/td6B4evprLTC140fHnJ91zyMpnggEckkD0zXzrF+2P49utQZ4dUVIS52xmCMoBnoePrz/8Arr2Lwj+2FqGvmHTZNEhfV5hmFkuNkUwxyO+GHpXbN8aPGNhHJc6hoOmvaKNx+z3pEgHHGGGCfbvXC/E/42W3iPwffW1nO9vcXSrF5bttZcnnnuMDr718wWlnPd+bf3EwTJLR5PLr0/H6fSqVzq95o+sRanDdLDMzgCbdwO+PVeAOnpT9U8Sahfzm8u5rxxDKWAS5aSMZ6AK4Ix19jXY+Afixd/Da7v7WBlu9Huh5jWqqYwkuODjt7gcH8K6zVdC17XtGufF/ifxWmkmSLzbSGI4U7RlMEHv0+XnNWfhH8U/E91r0mnaV4rv7WzVVMH9pt9oiduPkZTyASeCK+t/CfxW1SC9tdK8YabFp13cyCG2vLaQyWt0/ZQTyjHHCt17GvYYJlmQMDUufSiikzQaAaXNNppJxRRRmjNFFUh0o4NB60oOKeGzT6KOlKRSYpwGRRyDTg2aeMAEmqF9qMNqjMzgAckk8CvlD9qL9oXS9D8LyaD4f1GG71zUnELrbPvEMP8eWHQn7oHXk1+fc07azeyT3ruVZ8SHnkjoPyrpJLuxItFudNtvskW2IRRAJJIMjJ3AcEjuc1UsZl0rWzcWvn20If9y4ILDngH3rvb34hXWu2gWa/aOLBiVuTjB/MjJ/CudvfFL2enS2m15IeVDy4YnDZPP1zWA3iy5+xz72UBQTGoOR1OD+tZUOtG5hmspDuhmKspJ5U9/wya2vDdyLpLrSHUvdK6mF2P8AD0I/lV/VZhplyYNrGQgEkduB61Vk8S6hPp8qW9+wjK4kiZiwC5+6Aegz6VQ07xDd293bKJmjMEnmo0f8LY68V9nfDbxta+KPDRtNW1ifV4bxdszzLt8l+PlB7MDgg/QivaPCnxosbfw7Iuo6lE0+nEwz3EjBfMx91z6Fh+uaxfDv7XHhfUvEkelzJcwQPIYzePjy1OcKT3wfXtX0lbXSXMaspBBGQR0NT03GKDSZpC2KA2RRRxiiiikIzijoKpr0xS4xSHpQKetPFLjNOxRR9KePpSFc4IpGxGNxPSvFPjL8dl8BSx6LotkNU8S3EfmrAWxFbR/89JSOQPYda+IPHv7RvjDxM9xYavrLLZzHBt7NVjiIx0Pcj3zXkOq+ZcazbvKhjhkUCMHggkZBH4g1R0y0itNRNnqnnQwXDBhL/D1yC3tg5z7e9djbaQl1M1zDaqunW0zCISHaWyThsegGOfeuV122msr0xOQHyHC9Tz0z+daWuW1roR0mG3uopSn+sjZsbS+ec98YAP1Nc3r2p20lvDAsnmuhZmfGMnvkf5zjPes3TyZ0K+WWiAZST0TI4P502bTZLJ2lOdyjIUjBNaPgu8nTxXa+XgzSsY1J7FuM12er6Rd2c7PeRP5kySMQxwSQFYDn61zmkRkzSqYwwbcAQMFeeR9Dj9KytVtzYagSHaNgiOox2I65q1Nqc0Vmr207x+Y25kjYgKR9Kdb+I9Qdo4Z55JYzyscrkK3tXeWesx3c01wkOJrgxJDGVwI0A+YEd+gANfoP+zp8Urbxh4Yt7BpCNR0yJYZUY8so4DD9AfevoBCHUEd6U02kIxTG7UzdzT1OacaTgmnH2ppPFNLUuciqgNOBppoXjNOzTwaeKDS0YOeKePfrTh0rkvG/ii38OaLqGoTuBDZQPO/PUKM4/Hp+NfntrGtXp8E6n4t1LjUfEc7yu8jEvsZsImeuFHavn67hfVrpLyRMea+IwOAV3EZH5H8q3ZLUtPDEjCUxS+YueNhwRxnpkfzrPF7JqMHl3A2WEcixsNm7JAICgnkdSfqTWZFr93qLyRKzLHjkZ4UZz/SpPEPim11DVIp0QFIiqM4GN+AADj2xXJ6lqs1/M0krbnJ3fjVZYbqWJmWGR0ByxC5x/hXZaFrenaPod9FLbLLdyvEidh8pLMTnrycfhVfxBr1pq2t2oFt5EGCHCHuxOCPw2/rUGhx/YdSsdT3oFEoAB67gOT9OOv0rqdb8TnUtQ+1XEpfyopEO58D5uOe5OMVa0e80+4sZ2jEhuUiLFs9D0Ayfz/H2riNT3XFyZNpEaIUDZ/h5ApsETFo0t1ZsEtuI6nFX3tFjCy32WIGSi/e+oHpW74avWnuILVwpSX54tnBjYAkcn1r0jwH4/wBW8DeLrTUtMlKvt3SJ/DMmclSPcDH4V+oXg7xBB4m8OaZq1srLBfW6TordVDDOD9K3qaTUUj46VF5hJp/vSg+lO3U0HBp24U1mzRnNOBAFU6UdKWigYpw608UtKKcue1Ppkr7I2PtXxb+0l8SJ5/AHir7OQkH9qDSYmznzQpBkb25Uj8K+f/iTrkU3gzwvoVvPDLHFYpcGTIO0t8o3Y9AMn615FBJObaCMNzGo2H+6Ceg/GreoaqlvHZ/OBuhQyJgcMBjcfqAK4vVdWlvJjtJEe7cAvHPrVRrwpCyggE9SOpyaonLYx36Adqv2el3Fww8hDI/91F3N+VbSaTqMcHmLbywDAR15GPespYGW6MbAfJy27sPXmnKiyXYuioMaMMruw2O1b9hpplAe7Jht4k2jkAl8HAwfpyay7u0nlEhRCVDYHftn+VX7W5jsbc2rsjJIwMhRs/lTdT1KG5nAhYRWwUDpjoKyI5baR0RHlZ27gZAb0x3rZgjaSdPtMpi8tTsc5YLj0PXHfBrc0zR57e60y9iKvC8uxpFOQQB2H4Hj8q7HwhNY6l4i0zz5RGI5ishI/hPXr1/+ua/Sr4T6gtr4H0G0Y4aGzjjxn0Fek283mrnqKlJzUb0wAZzil60YpaQUGmZpQacOaqbvalByKdmjNJjmpFp4pc0UuSOaXcSRUF3MFQc45Fflb8V/FtxHpWteFTGWltfEd5dSSSNySSRgevP868lWaGy0EwmORpyo2MOg9jnsPamWusrZ2kEmCbg7lMZXIYdqxNYkTfG7yN9oIxIjKQU/+t0rHdwuQOgxkiq3MjADqas+SqRKx64yR6UkOo3FtKskD+W6EMpHYjpVq91y71KV5ZpG81upXgflVN7kuFyWzjB5606G7lQ/u/l9x1H410WkXqx3UZvUSWIsGfzGJJ/qTjPFHiLxOuqTsI0WO2jBESKu3ORjJA6Vy5ncknNKryONgyc1eGnXKoJPKRk4O1Xw2PX1rotO1CfTlX7SjyWbEbSzfNGSOnP4/XFdXoU8B1OG1XdNpl+vmIEb5oZOoH+yQc469uxp7QHTNcZ2kVkU7wVGMg8g46f4V93/AAg8U2N/ocFzp8wELPhotw3RNgcEf5HNfSGh3aT2ykHkitUkCmE5NJigU4AEdaXaabSGmUoFOFUQacDilLelKpz9akHSnA04daWil6ikzt59K87+KPjD/hF/DOo3ySKs0Ue2It08xjtX9TX5V+L9QlbVtRFzMZrqa5ac7lySSTkn0zmszVNQaXSI5LtSkqDy4lxhQOo+UdOuc1y328xRpuYOVZsEjkBsZx6dP1qrKhuImlbAdQBjOWPbP5Yqo9nMuMqdrDIOOtENpI+47TgDn2/yaulHe2IZT5gPz59PWqjWTRg78DBAJz0qHb5T/MAccEGpWWOSMbSu5R34OKrscHg8UsbkMDuIIOa2LaS2MIe4spWibKiSIDr+I5603+y7eeJmilYOATtK9f8AA0kUn2W3AdVAQkcdef8AP50t3cb7qJoy0TlVJDY5bHWumjFtqHhq9iniddUtlMiTdAUGCFI79c5/xrJ0TWJdMu4JY+I8qQO6lWz/AFP511+o64Llv3GDKULjjPO7OP1Nd14bfxJZQWfjDwvb3KWkfzyQKC6xFRls+qHk46jmvq34bftA6rreipff2HHN5EiJPHazchW6OoPWvqPRdXi1izSaI545rSoNIKcDg07cKYTTSaTNLSiqVFJT1I/Gng4p9Opw6UCnVDJkI1fGH7WPxNuNKvrbw5p0bNcxMl5PJtyExygOeMdzn2r4W1HU3bVpbtHaaSZt7SMm05J5/wAOKsa48B0OzfYguGJJJ6j6frn61zi6ebiz82JwZo3w8eRkDscelS/YBgTbSwXHyk5I9a0prqSRIraBFkt1YhEcDOD29cc/zrU0zwrcXM0flqY5SdrIRkgf1FeneHfg3PIWkuIXw3KjaQp6cE/n2p+tfB+czpussbBtGOw7YOMn8fpXmnjD4T6toOLpLdntpMnI6A+g7GvPntHiYrIrK3oRinRae8vKAkDrU76NNGBkHJ5yOlTwaX+5JyN47sGP5Y6fjWtaziLzY2k37Y96heV3jqB3GVzn6VTuY4XZ2jPyhQRk4zg4wfwI5/2aqXdsz3MbRtllXKnfuyB6EVvwzOdtnO++eaExLt/2wPzrnzD5fmR5ACyHIPUdas6femGVSxHmOR83dAAT+px+VfSHwAfW5tM8TajoANxHpsqStpz5YzI4ywX34OOKv+H9Qt/CfxdspNIm8rw/rkiTCyBG4JJkMm3plJARj2FfoX4Is/slgB0GK6kct60h6mgDFNNMLYpQ2aQtSbqcDTqpdaWmmkGRUqEmpRTh0pQaXOacDUF5II4GNfnV+2FC7eOk1SwuI3EsCJOiybvLdMj5lHQYx+tfJcjTtHcyopAtuWQ4JjBOCMH3P0p8+qSXmlQ26AmFWLPllJz24xkcd+hrORnjlLgbQRnj0qZrgXUSqSyzKwVQD8uMc/j05+td14L8OPfSqGhYnb17885/KvpLwb4It4YYTJGZNgwDIvNeyaNZwQIqBML0BPb1rov7PhaMHyUZuOdvasjxD4JstbsZbee2idGBJUfL1/z3r5z8Y/s9Q3F832UugJ3AsN3P+f5Uy1+AtuNOEcjmO5A3ZeMBSPr3rH1D4GSRD9zMjk9DgisCb4VTaezlZvl7kJkH8e1cP4j8E3GkxSzqA6hsqydc1wlqA6zA52ojEf0qWCdYZHYZ2k7gvbg9Km0vUjp2v2V0VUrFKJgkq5XPbI9M1W1XVTqdxvMaIgLbAowVDMW2++MkfhWazYcY6V7f+z/8Zv8AhU3iaSW5tnudK1CJY7mONsOCPuuueMjn6gmu58Ualo2rfG/RtZ0Rs6VqMouLclcBH3YfjtlznHqa/RjQtYt0skTcuQK6C2ukuAGQg1ZbtTaQio3HFMHFMckd6RSSetTinZqkKdRSAcGhTg1MDTs0A07NKDXC/F/W73w94A8QalpxUXltaO8Rbop6Z/DOa+C/HFpav4JFzIsct9flVVpnLSuW6lT7gnOeua+adUil0eW+sZNkk8m1fNQ5+Tr29ePyqtZR6i1tLBbKWtHAaVVwucHOCetS6raR6anzlknYbRGDkJkdD+H9Kq6bBFPIgbcWLDp0PPSvpn4eaN5Nqu+NUj6hcZPPvXs+lAQwxhQMAc89K6/TJQCu3JJ68ZxXbWnlpGnXJHHNSkRlGccP0bPpWFeW4mkDKPuk846e1RTWsbWxWVFKkEgKPu+9Y1/YQhRtRRjgDAyQfSuUv9Mj/eMqLhl6YwfrXmnjTQYb+ynt2jG24AUOvBjb+9XyZrNrPoWr3NtNGFeNmVgR1Ung06DUP9HZNkeByEAwPx9apShW8xy2W65z1NVFcwq+SV3jBHrVYMzsBxiti0vlghCsgZwwwc9BXq3gi9fTde0TV9Sa0eKykWWFY5AwlKsGwdv3CQSPTjoK+9vCvi618R6fBc2NxuguVJRgeQRjr78/pXc+FPEMsRgEr7g4HPr616hHIJY1cdCKk28cVE7YpmcjNROxFMBLNU6rTsYpao0bvelBxTwfSkPFPjp9OAxRmnA4rH8UaPBr+i3un3AzDdQvC/GcBgRn9c1+TPxd0jUPCPiCfSr+e4W6sJGhEe07QQfvLk4APDceteQSXDy3LOS5dySWJ5YnrzTUu7mJiqTOAeu04qW4ZhbvE3zyk7mctk89veum8CWDXmqQqQzYIyF6/wCeK+tPDmniG0jAAAIzzxzXXWcRGMnHHpXVaKCWXnPPeu6s8mH6evepZZFI8vC5boN3X061WaISJgAru459RUTxsSwIH5Vk6hb9BgcfdPaud1C08xSvTbnnH6V534ksXWNiDnYc4xjg8f1zXz98WvCxvbZdSjVPtcPykqP9anoff0P4V41FYTSbxEDlOqscFfzq3bwRWjN9rnSMhd3B3MfYVk388c0uYUKQ/wAIPJ981CGBAyKkRwqE9yegro9Gv0WwuIpVJDxkZ6bWxlTn1yP1NekfC34tap4XRUWWYwwh9qqfulsBiM+wH5V9y+BfFlr4o0bTb6zlDqkSrKoI3I/HBx37/jX0bpLE2ERbuKv7simOuRUeMDpTSmeopUjAqTFGKUis6g0makUjIzS5zTlOKeOtOpRxzSd6H5UivjT9tD4WLf6UPGMDEtF5drdRFcgKchJAR0wcA/hX54zxyxStG/JQ46c069AmxcKCNwAyP73fNJPbqm0qDsYAkn+9gZH516f8K9NladZQ21S3Jzj8K+nNMHlQoMn8a6awBJHXPtXWaRalWGAefSu0sUZoTtKhgMgUy7smlkDk5kXnIGKUW2T8wJIBIIPNIYXIJbdjHp/n61QugxhKP8wUnGOa5W/BAcHp2P8AjXGanGfnJwQeK898QaXFcwSRuoMTZBGO1eF+INC/su7KSwq4P3ZCByK811yEQXkm3gHp9KzF+ZWGcYGR70i7j8oz9Klj2gknIx61oRTAWjIobDHIP941e0fbCjtITtYDp6g5zX1D+y/4l1s+JLbRLNGuLC4nSa4TYT7Fs/wjGCc+gFfpJZKRbIO2KsjijNBxTSKBS5pwOaKy6KKcOKcCKdUi9KdRnNIOaUkY5rzT4tacviPwlrGkDyyby2eJfM+6GI4z6c4r8kPGOl3Wi63eWl5C8VzBKUb1BB9RwfYismOd5LdyQrHIB+Ucj/P+eKaImZ1iwTg5x619LfDHwy1tpcU06/MRlRjkV6zbJHCvmSsFAHfrW1aapbLwSAoHUnmt7TfFdhbrEGmXn05P+eK6/SPGOmSTlPPAJz8oOccf5NbcWqwThQhLl+PY+9SC7jKj5TlTzn0pj3C4BYYTJJycECsDUtTt0cZb5D90nriuY1PUbMMQ8+CQST71y13f212WjjdWxnoc1z99aRzKVX7wPFea+MfDwuoCdoDocg+nqK8J8YeHXgVp0RuB8wx0964PB9KeAVIDcelaIlhHLFSTgkf0pHuDK2E4rsfA/hzUtZuEkt9Hm1CNWICj5UyB/Ef7o6n+dfeX7H3wi1PQYNV8V6zCIZNSxFax4xmMHJkH+ycAD1AJ719dINigDtS5pM0UZpaZzTlNPrJFLmjPrSg08U8dqkHSlJ4po5pc0ydiIWI9DXwj+0V8ar3RfinY6BDeTQ6ZalUu1RtoZ256jrgEda+XPiLc+brl4J/MNyJDvI5ic4zlOBkYx9Oa4SN1ktZFjULJkE/7X/6q3vB+mnxB4msoMfJjc4PoOtfV39pWPhnS1nuW2QRrgKoyzH0A7mvK9V+IF9rl7JKrm2jU4jiDEADPc9zVZvEl4IpM3XmEYZJI5ty5POBVK4+IU+mTPCjoTKoDLuOc5znPQmup8O/EOVpIgm4KqGRMNn5eQw+g6/n6V6x4Y+I9zBeQxPcb4ZuiZGAfX8K9c0zX2uoiVPBOBnvVPWPFS2sZidiWHJI614n4u+JEkd5BHuGwSPE5zgqf4T/nsa871j4jyyKu+7w7sflU/dxk1jWXjm4iizE/ztyztzgD2P0wBU5+J91G6lm3kjI+Tj6ev5VpWPxMstRP2XUMwmQ4jnY5UH0Y/wBaj1fSYrpZIigKOO3oa+f9X0eXStTvLR0P7o5GR1XsapxKXXaWxjseaiMW0nJG38qkt5MMGH1GRX3v+yP8JIfEmipr2rzLPpqvi3sYxtRmxyzkckf7PT1r7otbdLaJY0UBQMADjFTE1GzYpgfmpd2RRRmigCnVlmm5oJxzTgakU04VKDTT1oBxTg2TQ43Iw9q/O39t34b3UHjNPE8W02d/br5qqPnUxjazgd+CuQO3PrXyiuvXkVtNpZuVvLMf6syICy9Ohb5l6dB6VRsXVZCwUHJxgj8v1r174CeHmv8AxHqV3JxFYxgKOud/I/QV6D4+tZLvUEiG4xRr09K5/T9Es7SNjcxq4bswzn680270jwxqLuDP9llbG4wSbTx3xXD+I/DOkW7SBdVSQsQR5y7OP61n6P5Om3UflXXmRI25WU9PWvVfDcM91dQXEHzoABkHtX0HoCyC0UASZC8MAf8AINcl4ju5EkuJJRIjE5AJJr588Y34lllZ2C5fcPWvNb1JLyTKSMewFb2l+FdUuYI2+y5cjO9mH8q1R4P1C3/eNcJkjBjPpUF3oMsK4ILN/sjpXUeCprtIxaXRLQD/AFZJ5T6e38qx/i/o8cWnQ6kibZ0kWIsOjKc149HwN38R5xUZBkm2gcscVPDHhto5bdX7B/s5eGk8MfCPwna+Ssc72SXEoA5LyfMSffkV7ArZpWPFQOxpiHkVZQU40YpKdRWXTcYooHWng4qRTxT1PNDcGkJoBqRWHevI/j74GsvGvg65ju1lV7QNcQXEC7pbdwPvKO/HUdxmvyK1mzls7y4HynbI2WVdueTzt7CoLE7kYfL1/i6Zr6c/Z1tz/Y+tXpOTLPGmB22pk/zrY8UyyNdyy7cAZxXkus6/EtzJJq1wUsouUtY2w07dt2P4f509/iN4i0HS01bSdEgstP8AlCyuoG7PQgDqPesTUPjX4i1aExX6WN5GRnyzDgr368g+lUjb2L3UL3dpNosswEizRjdEwP8AeHT+Ve5+AtDvtAvfs90YpFYBhJA26ORSMh1I9j+dfTXhe2xZMwi3NIm1s8cV578SbT7PaSgIWxkbj1+tfHnitbzUdZltrcDg8l2Cqg9WJ6CrWhweEtFja71kX2trEQZWtQy20ZPRcjBb0ySBXRXXxP8AAMcAgi8GPHEVyJQQGzjjo/8A+qsGbWdB1ba+l319pc7cqkztLGPqG/mCKfpmuzW90bHUgBNgFHQ5SVfVTXaaKyLOrRk+W/VSvIP9KPizY/aPBdy205jkjYH/AIFj+tfO7rt39sDGKrxOySKw5YHI+tez/Bj4Max461K31G5ga10YPuNxKuA/PO0fxfyr9UPBlzBBplraQ4WKCNY0HoqgAD8hXXq4Pen7s01hmoxndVhDxUgopDzQBQazKKaaUUtSL0p60E5NJSilFVL+FZ4HVuQRg59K/JH42eHE8L/ELXLEW0sTJdusCvgBlzkZGOhBGD0IrzO3sLm5hurq106ZbWBgJmKkojHjG7H6V9VfAyy+yeAt7KAZp2Y/kBXV6noEd7A4IAZupIrznXPCNgJfLa3UAdGZRzUA0C1msXsLvN1prgD7KxwgAOeCORzzxT4fAHgZYrYnw9FEyg73knc7ueOCfpXeeHfA2h3cournS/OiUYDSfd6Y4B6/lXZ2eg2UE4W1txFESFjiHSNRxxXq2h2pjtNuQMcDIrgvHEKuHjlQsjZB4rw7U/hzpusyP9st98LDEqqxUnH3Tkc1r6h4NsLTwJf+F7fbHpN4A+VhDyxkEENv4JxjoQa8B1H4PWqzO1r4iR8f8s5bVg36HFWfEHhRZ9LtrC0igUwKqiUj5zjuPr3qvoXg7UpAYjMjhfmVW6A+2elei6J4VvreNWlxlT2PpWn48097nwPrELAArBvB+hB/pXy5qKGKSUsMMxH8q3fht4YPizxdpWmgbhPOocHoEByxP4A1+jmnwQWkEcUCLHFGoVFQYCgdAK6fRtdlsJV+b5K9Y0PWFvoVJPOK3FapBzS7aetSDpRSE0ZoNZO+lyaOtA4p1KDUgegGjPNLTs8VXvZBFbux4wK/MH9qz4jnxB40lgisLeI2LeSszIDLlTnJP8h2rg/A2u6jF4YitfIe50yaaVZ4lXksSCHB7MOPyxX0L8LLNLTwXYRRg7WeRjuHJ+cj+leh2+kecctnb2GOtSzeBI7xSCiHPHzAHFZr/Dq1Gc2MOehIBXPvwavad8O7S32yR2VujAAhjGWYfia2zoq26oHGRjqT/TtUmmWiXNyfKRfKj4HvXeWVo3kNtAIUVxniu0EscoYewJHevM7cKLtreUgMDtB/z7VvDwqmo2u0gdM9cVyeofCGa/lLDkHglsEj8aqRfBKTzAJXkKDnaB0q3F8KYNNcPE7huuGpZtJazITGV9h0NYPiiyE3hvV4imQ1rJx3+6a+e9EhtdP0yTULm0W5klYCNT0HHetLSpJdK8T6H4j8NafIrXYeG5tIIy211IyQB0DAjp6GvsTwxc3dzZQy3UMkMjqGMcn3l9jXRqxGK6rw3rzWcioWOK9X02+F3CrA5yK0VbpUinNSqacDSk4qMsacDQTWPmnbvekz+lO3e1OzinZzSg04Glp1Liq96glhZGztPWvyN+OngzVPDvj3xBa3vmsgum2STHmQZ+Vh6jaRXo3wb8KlPh7a3hXbcSGWbDDjmTaPr0r1XwBaC20LTIGUhgrEgeu416fptvyhbr2rp7K1WYnC4A6VsLpCqodoyR/Oo5LBIVZmbaMghcVzPiFEn3QW5xk/Mw7D0FZ2lzQadI6lgMcfMa6mPxRbwwyqqAl0Kbjj5TXnviXxFDE8sUkygZyMn1rjbe0i1i5nkUlQwBWRDyrDoa9R8JxCey+cqZozsYDpmup/s1VUELs47VBNpuCHPUDt0P1rn9UsTjOG/wAK4PU7MRTEseGH51yeuwq+n3SHo0bKfyNfPc1isPgu2CqC0cm3A9STXqn7Pmnh1muih/ch13e7Ef0WvoSNQo4GKkzTo5vLcEHpXpPhXXkVFRmrvra6WZQVOatK+KmV808GkJpuadmnVj5pCaAacDTxntyKcOafilFOFKTRuprjepFfNf7XXhCLUfhde6gbVZZdPuIpvM2gtGhO1iD17ivGfD1q3h/4V2ayxqskFoMBCCJAcsGH1B/MGut8IOItI07OFxCufbjNd9pt1zliAgHAB6111hdog3bgTWw/iGKGHaM4wcAmsC+183b7Q+fT3rzjxV8QrDwhcXn9puI2AEgz3Ujr7188eJf2m9POos1nZXzQZ5cIFVvcZIrc0v4ux63pYvLGdwjna244KEfwkdjXn/jP4qRaVKIXM011IA21T0HbOenSuj+HXx302YpaTRzW9we8oyr/AEYf1r3DwJ8Q4ZfELWiuPLuFBjOf4x2/Efyr26HVFdBkrz29aV7wbDyPeud1eaOVdpOQOwOK4PW7mPacgAgmuF1q7zZXLA4OwnBrw+xlEvhWZWJPlybxn3J4/M17f8DdJk07w1JPICPtMmVB9B/9c162rg0/NNNWLS+e2cFWxivR/C3iEyhUZq9AhmEiA5qyjVODxxTGbml60oNPBrGzSE0gNSU9TinhhnrTgadSE4ozSZNOBrJ8TaJb+INDv9Lu0D215C0Mgx2IxXxV4x8PS/DLQdW8O3E0k8FohW1kkOSIpCSg9gCSKveG7pTo9qA2QIlHp2rqrPU9pBB5xWmuuSRyR+V91vvA9cVU1rxStrHuJGcdCeoqv4e8QNqlyDgiMc4Fc98V/CUPjiwigmuzbXcTHy5tu7g9QfavI9N+BNtbPsvNYN3uONkcAHHc5P8AhXO+I/AM3hCeWPQ5GurZj5rwsuJE9+Oorjf7Ml1qeSa7stx24z5Z5Aq+ng66kmhkhCxRqOQI+RXc6JJJo8ttNG7GSBw27uSK+iNK8awzIqhwM46kcVvHxHv2kSqAOBis6/1sbXYHr1zXD6pqnmOOec8iuU8S3yx6TeMBuHlnPvmvLPDsYl8PKznass2TkdFXJJ/SvpnwFk+EtIcx+V5kCuF9AckfoQa6lTipgeKGOaiJ5rX0S/NtcLz3r2XQb37Tbqc9q3lOKkEmKUtzT1PFL9KcKx8Y5pjsR0pVORT+1KGA7iojIVfpVyN9wzUlMkcIMmoPtKtkYqtJehHAGetWoJ2k7VaAyOa+df2sNItX8CteAqt6jhVx1ZO498V4B4R1NX0yCIEEgBMA9wP/AK1dhZTEgDdwKtNO4Yln2IvTIzmvMvFWtTXOpBbmc22nRHMjZyzf7I9a3vDXjMPG8OmwfICArov6V1Usd7qEEks8gUAqo3uFUcGp7a0sw2wahEshJwyxl1XI45Hbj9a17DwdHHcS3XmW18koO9xLsbp6HkVh+IvC+lxWUi21zbRNw6oZQSD+A571wUWi3kMpwokj/vKwbB9KoahDb2krm4TaF6uv4day9S1uzlm3Wd2IbmM7du7rzjkV3fh3XZ7iwTzWzIOuatajqJ8vk5yema5271QLu3E57Vyfie/d9LliQ7coQMHnrWd8PPDN34osEtB/qGcpIxOAkRbLEe5GRX1JaxrDEkaKFRAFVR0AHAFWlNPVsGlJzTTToX2Sqe2a9Y8G3ytEqlua71GDAGn5pQ1SK9PD07cKyiRScHtQRUVwrMny5qC2gmDZbI+tXxEGHPWpY12ipBSOgcYNUbi06FSTTYLLIG6tCONUHAqQ18qftK3ktxJqkE0xSO3iQRxnvxnP5n8cV4D4alXy4HiypbO8464HBFd1pl2ZGyFPyHawNdILP7ainlRjivIfiV8PdX1S8sI9NQsBKzvk/l+FUEv/ABt4HMeljw4koXGJ7Yht3vtODUsniTxDcBXm0bVpJs8JLCdoPX6VLp/i/wASsWT+xr9AvI225IP5VLffEnU7WN4rkTWoAx86FScjGCTXMzfEa/MbPHBLIQMgryDWefHfiDzC40y8i3Y5iifkflzVDU/idcCGdb+0mcsCH/dFW5HeuA/4mHifUWu7GGSOKMY+Y/MwP0r6g+GcEtx4e3XAYyxMYyGHPHrWnqkaKrAMC45rgdTvH+0+WCVXpkDOaxtfG3SpJFYkKCGJ759K734K3Emn2i2lxDtF0PMiccg8mvaomqwGp26l3c0hNMJwa6Dw9rT2c6qWOK9k0fU1u7dTu5xWsH+lOVs1IDinB8VIGzWcADQFpcU7bxQBinr0p46U4UtIRmk209RTsVwXxK+HGieOtOkTUYWWcRlUuIjtZR6H1Hsa+FbK2OkahPYtlVgdo26YBDEA+2RXU2s32eQ7fuzYbGenYmup0vUz5K/NjjvWzbOt9dRoEDKccjtV7xToMV9ahVCm4iIZc965fTZJtOdlaLGeGyOtdz4Zv9AdD9sjMc/AzGBjOOproWk8NzceUpGergHP+cVmanLodravttrb5yTgKAAK8y13XbK28yO2hRCfQc/hXnF3odr4mv1+2QJKh/vDkD611ul+EbO2i220SRRhQu1R19zWvDappdsywIFVlIJ/vd81xet6jhmAO05xyOtcxdxhiGMhL9CCev8Aniud8RtI1mttCN0szhQoGfqa9f8Ah3oV3aw2kksTQwwoNquMMTj07V6chwKlD0vmU5XyakzxTCadG5RgwPIruvDPiAwlY2bj616fYXqXMakMDkVooamFKRSrxVMDFLSZqQMcYoAzSgFfU09egBp9KBRijFOA4pSOKqX0JmgZR6V8IfGTQX8KeP8AU4XjZIb3FxER0YN1I9wRXK2OoGR5AzD92Rtx0A6H+ddTaXm3PIycV2OgzlAXztPT2ro7ucSIrM5O4dB1rhdfvbrT8OEaWMZww6iuD1T4nmzDL5Y3Dj50IP5iudl+Nr26kvaSEYx8r/41SPxnlvWAEG0H1c8U1fGcmoOBg7zxhBmu98JWN3dESyJsU9Fr0mCOK3hAIAYDGe1czqOqR7pIy5G3JJHpXnmsOJpTIGYAsTljz7VhXN2pdQAS2ecmp9B0lvEfiW3t0cJFa/vmbuTxxX0Xax+WgwKtZxS7uKQvSq3NWgcqKQnmjOatWsrRSBlPIr0Pw3rjfKjGvR7KYTIDnrV5af1FKBVKgmkp6mnluOKcpyKcoxzTu9PHSkpM0oNPzxTWGQRXzx+074DbXvC4121U/wBo6LmQY/iiJG8fhgH86+NoNS2OrENmY/pXb6feL5aIQQBjHNdho+oqSB3UYwD1rqor1Z41HUYGR6Yqymif2kpAOUboMVm3vwXtNUJkl2qW445x74/pXJ6v+znaMjR21ySVOSWUfN7Cs62+A9pGMSMCeFJ28/X8+K6Ox+E9hpy5EQdh2GBzW1FYRafH5ajaAKwdW1IRQv2Xnoetec3uuLIBKJcENgjt9a5m/wBTa6aTaT1zg+3vVHyJXVmRgXI+Ynt71658L/Cw0q0a+m+e5u/mBI5RfSvT0GBinZ4o7Uwk5pynBqcPxilBzT1ParsCgGuh0JGNwu3pmvYNJBW3TPXFaoPFPQ08nFZ26nZzRSinZpwPY9+9SK2RThT80h6UlKDnrS7u1Gax9dskvbSWGRQ8cilWU9weCK/NX4ieGbrwl4mvLNbdorYSF4Vfgqu48Y9sj86TTNUMzhRggDJK9q6Oz19bO5QSNweR716PoeqxTorDHt9TXaaRfi3LKuCPU102na3bPOVkxheDnjFP1HWLBJWCv8oO4cjFc9c6jbLE7I48xiSo7nn/AArJl1pA2EkBPUE9657V9UjkZ9kny4JPNeS+L/FHkqUU7lJI/rXm9zqjSZjDbQwz71Jaai0kcgBUuBtHPX3FbukW9xqV9aWkak73UuQR09K+kLC3W3gRFAAUAAVoKfwp4pCaYTzTkBzU4FKOtSJkHNW4T8wr0HwnZK5VjXpdugRABVtTxQHw2KlLcVnUop9KDS5pRzT04qUGnZ96TNJmjOaAKXNQzqHBBr4x/a88Nvp+paTrEXC3COrYHOVx19cgivliz1ZbW7d1LDcASM4H51rLqxmuFYkbR0O7J6+ldhoPi8WsqoX2qxwpJ4Feg2fi+N9mZsEH17gU2Lxm0DNhmO9ehPvzSt4tFwWkLHHG7J5FV7rxUZImQPt2nkVh3njRIVDM4DA8Z9O9cxqHjoSxlYn5OQST0968/wBR1U3k0kgcsF4OTkEj/wDXXN3V2VkChiG24yPStLTLlobZpHBPlnHpn0r0rwHqlpoNxa6lfIXE7bfl/hJHavofT723v7WK5tZBJBIMqR/UdjV4UtNzQoyamUdKeKkRc1MFqeFG3jFekeEVcbcg16LF9wVMvWn45zipBWbmng8UhalBzTs0oNPBqRTmnZxQOaQsBSqwNOz7UtVbuYRITXyv8fte0/xVevoInWW5sI98qJyYt+cfj8vSviDxHod1pF7PFtGxTnI/z3qhZaypZXVf3m8bVzkIO1dBbanBe2jqSRLnAUN6HgZpg1i9giZC7KEfOCTwOf61f0vxiVkKSyEqBxn19qvz+Nool3bwMjBrD1Hx4m0qj7pMEDBPFctceIbi7nMjSsMHjLZap7CeS52hi2wcn5uPxq9cPHBGAoBB+9gVgtdIJmOAVUjHvWjaTSXksaYVI16jPX/Irrdbs44NAgml3MocAHH3AQcHj3xzXf8AwM8cyi5k0W+kMkBxskY5aPsM+qn17V9BsNhwaTOaKeoqQVIiljirlvau5AArfstCaYfdNbll4XO8ErxXdaPpQtkHFbyDAqVBUgxS5rM707PFIeaBxTwacDTgaevapMc06om5PWkVsVIr5607PFcF8TfGEXhLw5e3rEeesTMg9P8AaP48fWvgjwlqc2o67rupXk++81BgzK3LHBJ3E+nOAKd4w8OR67ZyKR++UHaw6ivn/VNBn0m8KzbxtOQwOMj2rMTUpoHOCMFg2BWvHryzgpMuN4wR/L/JpJyrZMX5Z6VXnkaWM5IOODiqKWgnb5WI5wPX8a17DSowQz/Ng857VbF9b2wlizhcdVHft+tZFzqkny4fPBHXpVO3We6cIBx2zXfeGtEcMJrmNdqngE81peNr+GDTbSObcIZJ1QlOqcHBx7Y6VS+H5uLPVvtlrKryW8pVXA+SRe4+h9O1fY/h+Qa9o1vd2ZzkbWiY/Mjd0PuO3qKfL5kD7JEZG9GGKQSEmraHIzTxWhp8BmcD1rs9M0UvtO3iu40rSlRRla6CKzjQcLVhVC9KdmpENOJpazxyKKXHFJThzTqcBTwcU4N60/PFRs3NItKxCgnOAOc+lVJ78KGxkRqCS3c464H4gfU18/8A7QuoGLw7qpkwHhiXzR/D5r5EUXvtG5z/ALtfG/hq+l/4SQQRlEtbSLDqucmR+fmJ5zhc+nzCvTolEnauR8WeEI7+ORkQ5YZAx1I9PQ14rrng6a0kkeLJRW445Fctd20sLjcNwHG5R19zUKzyIpGMZ7kc49KsjUsKV2AejZqFbrDM3PzdTmrLanJ/q1JAPAqsFlmm2jlvSuhsPDUl26tKvyHk5JBrsdO8PwW2CFBIHHtXQwQ7R7DoBXD/ABGm32kUeekmf0rX+EyJeyxJKyqLglHkxjyySArf99BTX2J8FvD9/qFxfRmPy0s/kvVx1XJAdR3KkEH2rvNe0s2VxPa3SBniJ3ZXcGGMhhjkjBzxzjkdCK5ifRDh5LVgyoAzIWBKKejZHDKezCqixvHwy4+tPFdF4ajElyoNeu6dYosSnHatqFVQcVYVuKdmgGpFNSZzilFZuaUUvamjr7U8U4c08GlNKKUNUU0qRDdI6qPUmomuXMqwxozO3fHC8Z59OKc2ZSAu5l4OVHJHYj6nhQfcmqN3dJZQ3F0yKyWa7sDpJITiNR7ZyfyNeG/FuwhPgPW5rndLIIGndsZ3TSttB9iERv8Avo+tfEHgid7k6pes2ZJdQck98AACvXdOuA8YJ+8OorVVVlQhuQeh9Kw9e8OwX1urpGCyg/dHXNeNeIPB7WkrvGuUyeCOlcbcaUFZt0fB9KzZNNVe2Bn0pp0pCoCsM/Q1o2OhxsBvZmb0A6V0th4ehUh/LOccs3Wujt7SOIccn0FakMQOCcbQOAKkmkARh6CvLvHMnmMF9DXof7PuhNr9zFD5TsiCQSMBlVTOC/8AwEuD+VfpH4P0H+xNOsJrSFY72JTFOoH+uljGGB9fMjAb6rmrHivw+mpW9rd2S5+VTF820vET9wnsVY8Htkehpnh3wgmmkTuCZjuZQEztP8RVff8AjiPfJWpT4NsoLme4toU8uRS7Qs5KKcdUzn5CeORlTwawdS+HlhfKtxAfKEyq6mEYGDxnaeODwelY+neEbrSrlJVdZoj8wIBDAepBr0exP7hQeoq6hwanHFOBp1PFPXNPzX//2Q==';
+let photoImg = null;
+
+function loadPhoto(){
+  const img = new Image();
+  img.onload = () => { photoImg = img; drawPortrait(INV); };
+  img.src = PHOTO_SRC;
+}
+
+function drawPortrait(inv){
+  const c = $('#portrait');
+  const W = 176, H = 140;
+  c.width = W; c.height = H;
+  const x = c.getContext('2d');
+  if (!photoImg){                                    // pre-load: blank paper
+    x.fillStyle = '#eceae4'; x.fillRect(0, 0, W, H);
+    return;
+  }
+  const ir = photoImg.width / photoImg.height;       // cover-fit the frame
+  const cr = W / H;
+  let sw, sh, sx, sy;
+  if (ir > cr){ sh = photoImg.height; sw = sh * cr; sx = (photoImg.width - sw) / 2; sy = 0; }
+  else { sw = photoImg.width; sh = sw / cr; sx = 0; sy = (photoImg.height - sh) / 2; }
+  x.drawImage(photoImg, sx, sy, sw, sh, 0, 0, W, H);
+
+  // --- Bayer 4x4 ordered dithering down to 4 grey levels ---
+  const B = [0,8,2,10, 12,4,14,6, 3,11,1,9, 15,7,13,5];
+  const pal = inv
+    ? [[216,214,207],[143,141,135],[85,83,79],[22,22,22]]   // light -> dark
+    : [[22,22,22],[85,83,79],[143,141,135],[216,214,207]];  // dark -> light
+  const img = x.getImageData(0, 0, W, H);
+  const d = img.data;
+  for (let py = 0; py < H; py++){
+    for (let px = 0; px < W; px++){
+      const i = (py * W + px) * 4;
+      let v = (0.2126 * d[i] + 0.7152 * d[i+1] + 0.0722 * d[i+2]) / 255;
+      v = (v - 0.5) * 1.15 + 0.5 + 0.06;              // mild contrast + lift
+      if (v < 0) v = 0; else if (v > 1) v = 1;
+      const s = v * 3;
+      const base = Math.floor(s);
+      const frac = s - base;
+      const t = (B[(py % 4) * 4 + (px % 4)] + 0.5) / 16;
+      let lvl = base + (frac > t ? 1 : 0);
+      if (lvl > 3) lvl = 3;
+      const p = pal[lvl];
+      d[i] = p[0]; d[i+1] = p[1]; d[i+2] = p[2]; d[i+3] = 255;
+    }
+  }
+  x.putImageData(img, 0, 0);
+}
+
+// procedural QR-style pixel grid (25 modules, seeded, no library)
+function drawQR(inv){
+  const c = $('#qr');
+  const N = 25;
+  c.width = N; c.height = N;
+  const x = c.getContext('2d');
+  const FG = inv ? 'rgb(233,231,224)' : 'rgb(22,22,22)';
+  const BG = inv ? 'rgb(22,22,22)' : 'rgb(233,231,224)';
+  const M = (px, py) => x.fillRect(px, py, 1, 1);
+
+  x.fillStyle = BG; x.fillRect(0, 0, N, N);
+  const finder = (fx, fy) => {
+    x.fillStyle = FG; x.fillRect(fx, fy, 7, 7);
+    x.fillStyle = BG; x.fillRect(fx + 1, fy + 1, 5, 5);
+    x.fillStyle = FG; x.fillRect(fx + 2, fy + 2, 3, 3);
+  };
+  finder(0, 0); finder(18, 0); finder(0, 18);
+  x.fillStyle = FG;
+  for (let i = 8; i <= 16; i += 2){ M(6, i); M(i, 6); }        // timing
+  x.fillRect(16, 16, 5, 5); x.fillStyle = BG; x.fillRect(17, 17, 3, 3); // alignment
+  x.fillStyle = FG; x.fillRect(18, 18, 1, 1);
+
+  const rng = mulberry32(241087);
+  const inFinder = (px, py) => (px < 7 && py < 7) || (px > 17 && py < 7) || (px < 7 && py > 17);
+  const inTiming = (px, py) => (px === 6 && py >= 8) || (py === 6 && px >= 8);
+  const inAlign  = (px, py) => px >= 16 && px <= 20 && py >= 16 && py <= 20;
+  for (let py = 0; py < N; py++){
+    for (let px = 0; px < N; px++){
+      if (inFinder(px, py) || inTiming(px, py) || inAlign(px, py)) continue;
+      if (rng() < 0.44){ x.fillStyle = FG; M(px, py); }
+    }
+  }
+}
+
+// fit the 340px card into narrow viewports (down to 320px) via uniform scale
+function fit(){
+  const sc = Math.min(1, (window.innerWidth - 20) / 340);
+  uiScale = sc;
+  const scaler = $('#scaler');
+  scaler.style.transform = 'scale(' + sc.toFixed(4) + ')';
+  scaler.style.height = Math.round(540 * sc) + 'px';
+}
+
+/* ============================================================ EINK */
+// full-panel refresh: ink-black ~120ms -> paper-white ~120ms -> reveal.
+// done: optional completion callback (used by gotoFace / presenter chains).
+function eInkRefresh(reveal, done){
+  if (REDUCED){
+    if (reveal) reveal();
+    countRefresh();
+    if (done) done();
+    return;
+  }
+  if (flashing){ if (done) done(); return; }
+  flashing = true;
+  const f = $('#flash');
+  f.className = 'flash ink';
+  window.setTimeout(() => {
+    if (reveal) reveal();                    // swap content during the black frame
+    f.className = 'flash paper';
+    window.setTimeout(() => {
+      f.className = 'flash';
+      flashing = false;
+      stampIn();                            // ACTIVE stamp re-stamps after reveal
+      countRefresh();
+      if (done) done();
+    }, 120);
+  }, 120);
+}
+
+// small partial-region flicker (status bar clock updates)
+function regionFlicker(box, apply){
+  const f = box.querySelector('.rf');
+  if (REDUCED || !f){ apply(); return; }
+  f.className = 'rf ink';
+  window.setTimeout(() => {
+    apply();
+    f.className = 'rf paper';
+    window.setTimeout(() => { f.className = 'rf'; }, 90);
+  }, 90);
+}
+
+// red stamp lands in 3 discrete steps
+function stampIn(){
+  const st = $('#stamp');
+  st.classList.remove('on');
+  void st.offsetWidth;                       // reflow to restart animation
+  st.classList.add('on');
+}
+
+/* ============================================================ KINETIC */
+// stepped 4px marquee: measure one sequence, drive CSS steps()
+function setupMarquee(){
+  const seq = document.querySelector('.mq-seq');
+  const track = document.querySelector('.mq-track');
+  if (!seq || !track) return;
+  const w = seq.offsetWidth;                 // layout width, unaffected by scaling
+  if (!w) return;
+  const steps = Math.max(1, Math.round(w / 4));
+  track.style.setProperty('--mq-steps', steps);
+  track.style.setProperty('--mq-dur', (steps * 0.13).toFixed(2) + 's');
+  track.style.setProperty('--mq-dist', (steps * 4) + 'px');
+}
+
+// decode from random mono glyphs, left to right
+function scrambleAll(){
+  document.querySelectorAll('[data-scramble]').forEach(el => {
+    const fin = el.dataset.scramble;
+    const inner = el.querySelector('.scr-inner');
+    if (REDUCED){ inner.textContent = fin; return; }
+    if (el._iv){ window.clearInterval(el._iv); el._iv = null; }
+    let t = 0;
+    const lead = 4;
+    el._iv = window.setInterval(() => {
+      t++;
+      const rev = t - lead;
+      let out = '';
+      for (let i = 0; i < fin.length; i++){
+        out += (i < rev) ? fin[i] : GLYPHS[(Math.random() * GLYPHS.length) | 0];
+      }
+      inner.textContent = out;
+      if (rev >= fin.length){
+        window.clearInterval(el._iv); el._iv = null;
+        inner.textContent = fin;
+      }
+    }, 45);
+  });
+}
+
+// pointer: snapped 2° tilt (max 6°) + name letters shift baseline ±2px
+function bindPointer(){
+  if (REDUCED) return;
+  const card = $('#card');
+  const tilt = $('#tilt');
+  let waveIv = null;
+  let phase = 0;
+
+  card.addEventListener('pointermove', (e) => {
+    const r = card.getBoundingClientRect();
+    const nx = clamp01((e.clientX - r.left) / r.width);
+    const ny = clamp01((e.clientY - r.top) / r.height);
+    tilt.style.transform = 'rotateX(' + snapDeg(-(ny - .5) * 12) + 'deg) rotateY(' + snapDeg((nx - .5) * 12) + 'deg)';
+    letters.forEach((el, i) => {
+      el.style.transform = 'translateY(' + Math.round(Math.sin(nx * Math.PI * 2 - i * .9) * 2) + 'px)';
+    });
+  });
+
+  // font-weight wave 300-800, snapped to 100s, travels left -> right
+  card.addEventListener('pointerenter', () => {
+    if (waveIv) return;
+    waveIv = window.setInterval(() => {
+      phase++;
+      letters.forEach((el, i) => {
+        const w = 300 + Math.round((Math.sin(phase * .55 - i * .7) + 1) / 2 * 5) * 100;
+        el.style.fontWeight = w;
+      });
+    }, 80);
+  });
+
+  card.addEventListener('pointerleave', () => {
+    if (waveIv){ window.clearInterval(waveIv); waveIv = null; }
+    tilt.style.transform = '';
+    letters.forEach(el => { el.style.transform = ''; el.style.fontWeight = ''; });
+  });
+}
+
+/* ============================================================ SIM TOKENS */
+// sim: mutable state of the simulated prototype.
+const sim = {
+  battery: 87,
+  online: true,
+  active: true,
+  nfcMode: 'ATTENDANCE',
+  refreshCount: 0,
+  lastRefresh: '--:--',
+  busy: false,
+  presenting: false,
+  token: { sig: '----', madeAt: Math.floor(Date.now() / 1000), slot: 0, tamper: false }
+};
+let uiScale = 1;
+
+// hardwareConfig: components, pins, wires, costs — edit pin maps here.
+const PWR_C = ['c-batt', 'c-tp4056', 'c-ldo', 'c-usb'];
+const PWR_W = ['w-usb', 'w-bat-p', 'w-bat-n', 'w-out-p', 'w-out-n', 'w-ldo-3v3', 'w-ldo-gnd'];
+const SPI_W = ['w-spi-0', 'w-spi-1', 'w-spi-2', 'w-spi-3', 'w-spi-4', 'w-spi-5', 'w-spi-6', 'w-spi-7'];
+const I2C_W = ['w-i2c-vcc', 'w-i2c-gnd', 'w-i2c-irq', 'w-i2c-scl', 'w-i2c-sda'];
+
+const hardwareConfig = {
+  bom: [
+    ['ESP32-S3 DEV BOARD', 700, 1000],
+    ['2.13" E-INK DISPLAY (SPI)', 1300, 1800],
+    ['PN532 NFC MODULE', 300, 500],
+    ['LI-PO 3.7V 800 mAh (PROTECTED)', 250, 350],
+    ['TP4056 + USB-C', 100, 300],
+    ['3.3V LDO REGULATOR (EST.)', 20, 40],
+    ['PASSIVE NFC TAG (EST.)', 30, 60]
+  ],
+  parts: {
+    esp32:  { name: 'ESP32-S3 DEVKIT', sub: 'MAIN CONTROLLER',
+      purpose: 'Runs the badge firmware — Wi-Fi/BLE sync with the gateway, drives the E-Ink panel over SPI and the PN532 over I2C, deep-sleeps between updates.',
+      volt: '3.3 V', iface: 'WI-FI · BLE · SPI · I2C', cost: '₹700–1000', status: 'REAL IN FINAL BUILD' },
+    epd:    { name: '2.13" E-INK PANEL', sub: 'SPI · 250×122',
+      purpose: 'Bistable display — holds the card faces with zero power; only redraws on refresh.',
+      volt: '3.3 V', iface: 'SPI', cost: '₹1300–1800', status: 'REAL IN FINAL BUILD' },
+    nfc:    { name: 'PN532 NFC MODULE', sub: '13.56 MHz',
+      purpose: 'Talks to gate readers and writes the passive tag; used for tap verification in attendance, library and campus modes.',
+      volt: '3.3 V', iface: 'I2C (0x24) / SPI / HSU', cost: '₹300–500', status: 'REAL IN FINAL BUILD' },
+    batt:   { name: 'LI-PO BATTERY', sub: '3.7 V · 800 mAh',
+      purpose: 'Protected cell powering the badge between USB charges.',
+      volt: '3.7 V NOM', iface: '—', cost: '₹250–350', status: 'REAL IN FINAL BUILD' },
+    tp4056: { name: 'TP4056 CHARGER', sub: 'USB-C · 1 A',
+      purpose: 'Charges the Li-Po from the USB-C port; overcharge + discharge protection on the cell.',
+      volt: '5 V IN / 4.2 V OUT', iface: '—', cost: '₹100–300', status: 'REAL IN FINAL BUILD' },
+    ldo:    { name: '3.3V LDO', sub: 'REGULATOR',
+      purpose: 'Regulates battery/charger output to a clean 3.3 V rail for all logic.',
+      volt: '3.3 V OUT', iface: '—', cost: '₹20–40 (EST.)', status: 'REAL IN FINAL BUILD' },
+    tag:    { name: 'PASSIVE NFC TAG', sub: 'ANTENNA LOOP',
+      purpose: 'Battery-less sticker read by standard gate readers even when the badge is dead or offline.',
+      volt: 'PASSIVE', iface: '13.56 MHz RF', cost: '₹30–60 (EST.)', status: 'REAL IN FINAL BUILD' }
+  },
+  pinMaps: {
+    EPD_SPI:  { title: 'EPD → ESP32-S3 (SPI)', rows: [
+      ['VCC', '3V3'], ['GND', 'GND'], ['DIN (MOSI)', 'GPIO11'], ['CLK (SCK)', 'GPIO12'],
+      ['CS', 'GPIO10'], ['DC', 'GPIO9'], ['RST', 'GPIO8'], ['BUSY', 'GPIO7'] ] },
+    PN532_I2C: { title: 'PN532 → ESP32-S3 (I2C)', rows: [
+      ['VCC', '3V3'], ['GND', 'GND'], ['SDA', 'GPIO4'], ['SCL', 'GPIO5'], ['IRQ', 'GPIO6'] ] },
+    POWER:   { title: 'POWER PATH', rows: [
+      ['USB 5V', 'TP4056 IN'], ['LI-PO + / −', 'TP4056 B+ / B−'],
+      ['TP4056 OUT', 'LDO IN'], ['LDO 3V3', 'ESP32-S3 + PERIPHERALS'] ] }
+  },
+  pinNote: 'EXAMPLE MAPPING — VERIFY AGAINST YOUR BOARD',
+  xray: {
+    boxes: {
+      epd:    { x: 62,  y: 20,  w: 178, h: 64 },
+      esp32:  { x: 90,  y: 134, w: 120, h: 86 },
+      nfc:    { x: 228, y: 142, w: 68,  h: 80 },
+      batt:   { x: 14,  y: 120, w: 54,  h: 98 },
+      tp4056: { x: 24,  y: 246, w: 92,  h: 58 },
+      ldo:    { x: 152, y: 246, w: 70,  h: 58 }
+    },
+    pinPos: {
+      epd_bottom:   { xs: [73, 95, 118, 140, 162, 184, 207, 229], stub: [80, 88], labelY: [79] },
+      esp32_top:    { xs: [97, 112, 127, 142, 157, 172, 187, 202], stub: [130, 138], labelY: [139, 144] },
+      esp32_bottom: { xs: [100, 120, 140, 160, 180, 200], stub: [218, 224], labelY: [210, 215] },
+      esp32_left:   { ys: [150, 205], stub: [85, 93] },
+      nfc_left:     { ys: [150, 166, 182, 198, 214], stub: [224, 231] },
+      batt_bottom:  { xs: [31, 51], stub: [213, 223], labelY: [210] },
+      tp_top:       { xs: [31, 51], stub: [241, 251], labelY: [257] },
+      tp_left:      { ys: [275], stub: [17, 27] },
+      tp_right:     { ys: [262, 288], stub: [113, 121] },
+      ldo_left:     { ys: [262, 288], stub: [147, 155] },
+      ldo_top:      { xs: [173, 200], stub: [241, 251], labelY: [257] }
+    },
+    pinLbls: {
+      epd_bottom:   ['VCC', 'GND', 'DIN', 'CLK', 'CS', 'DC', 'RST', 'BUSY'],
+      esp32_top:    [['3V3'], ['GPIO', '11'], ['GPIO', '12'], ['GPIO', '10'], ['GPIO', '9'], ['GPIO', '8'], ['GPIO', '7'], ['GND']],
+      esp32_bottom: [['3V3'], ['GPIO', '6'], ['GPIO', '5'], ['GPIO', '4'], ['GND'], ['GND']],
+      esp32_left:   ['3V3', 'GND'],
+      nfc_left:     ['VCC', 'IRQ', 'SCL', 'SDA', 'GND'],
+      batt_bottom:  ['P+', 'P−'],
+      tp_top:       ['B+', 'B−'],
+      tp_left:      ['USB'],
+      tp_right:     ['OUT+', 'OUT−'],
+      ldo_left:     ['IN', 'GND'],
+      ldo_top:      ['3V3', 'GND']
+    },
+    wires: [
+      { id: 'w-usb',     kind: 'power', pts: [[17, 275], [24, 275]], from: 'tp4056', to: 'tp4056' },
+      { id: 'w-bat-p',   kind: 'power', pts: [[31, 218], [31, 246]], from: 'batt', to: 'tp4056' },
+      { id: 'w-bat-n',   kind: 'power', pts: [[51, 218], [51, 246]], from: 'batt', to: 'tp4056' },
+      { id: 'w-out-p',   kind: 'power', pts: [[116, 262], [152, 262]], from: 'tp4056', to: 'ldo' },
+      { id: 'w-out-n',   kind: 'power', pts: [[116, 288], [152, 288]], from: 'tp4056', to: 'ldo' },
+      { id: 'w-ldo-3v3', kind: 'power', pts: [[173, 246], [173, 240], [84, 240], [84, 150], [90, 150]], from: 'ldo', to: 'esp32' },
+      { id: 'w-ldo-gnd', kind: 'power', pts: [[200, 246], [200, 220]], from: 'ldo', to: 'esp32' },
+      { id: 'w-i2c-vcc', kind: 'power', pts: [[100, 220], [100, 150], [228, 150]], from: 'esp32', to: 'nfc' },
+      { id: 'w-i2c-irq', kind: 'i2c',   pts: [[120, 220], [120, 166], [228, 166]], from: 'esp32', to: 'nfc' },
+      { id: 'w-i2c-scl', kind: 'i2c',   pts: [[140, 220], [140, 182], [228, 182]], from: 'esp32', to: 'nfc' },
+      { id: 'w-i2c-sda', kind: 'i2c',   pts: [[160, 220], [160, 198], [228, 198]], from: 'esp32', to: 'nfc' },
+      { id: 'w-i2c-gnd', kind: 'power', pts: [[180, 220], [180, 214], [228, 214]], from: 'esp32', to: 'nfc' },
+      { id: 'w-spi-0', kind: 'power', pts: [[73, 84], [73, 106], [97, 106], [97, 134]], from: 'epd', to: 'esp32' },
+      { id: 'w-spi-1', kind: 'power', pts: [[95, 84], [95, 106], [112, 106], [112, 134]], from: 'epd', to: 'esp32' },
+      { id: 'w-spi-2', kind: 'spi',   pts: [[118, 84], [118, 106], [127, 106], [127, 134]], from: 'epd', to: 'esp32' },
+      { id: 'w-spi-3', kind: 'spi',   pts: [[140, 84], [140, 106], [142, 106], [142, 134]], from: 'epd', to: 'esp32' },
+      { id: 'w-spi-4', kind: 'spi',   pts: [[162, 84], [162, 106], [157, 106], [157, 134]], from: 'epd', to: 'esp32' },
+      { id: 'w-spi-5', kind: 'spi',   pts: [[184, 84], [184, 106], [172, 106], [172, 134]], from: 'epd', to: 'esp32' },
+      { id: 'w-spi-6', kind: 'spi',   pts: [[207, 84], [207, 106], [187, 106], [187, 134]], from: 'epd', to: 'esp32' },
+      { id: 'w-spi-7', kind: 'spi',   pts: [[229, 84], [229, 106], [202, 106], [202, 134]], from: 'epd', to: 'esp32' }
+    ]
+  },
+  modes: {
+    IDLE:    { keep: 'ALL', hot: [] },
+    SLEEP:   { keep: PWR_C.concat(PWR_W), hot: [] },
+    WAKE:    { keep: PWR_C.concat(PWR_W, ['c-esp32']), hot: ['c-esp32', 'w-ldo-3v3', 'w-ldo-gnd'] },
+    CHECK:   { keep: PWR_C.concat(PWR_W, ['c-esp32']), hot: ['c-esp32', 'c-wifi'] },
+    RECEIVE: { keep: PWR_C.concat(PWR_W, ['c-esp32']), hot: ['c-esp32', 'c-wifi'] },
+    VERIFY:  { keep: PWR_C.concat(PWR_W, ['c-esp32']), hot: ['c-esp32'] },
+    REFRESH: { keep: PWR_C.concat(PWR_W, ['c-esp32', 'c-epd'], SPI_W), hot: ['c-epd', 'c-esp32'].concat(SPI_W) },
+    SAVE:    { keep: PWR_C.concat(PWR_W, ['c-esp32']), hot: ['c-esp32'] },
+    NFC:     { keep: PWR_C.concat(PWR_W, ['c-esp32', 'c-nfc', 'c-tag'], I2C_W), hot: ['c-nfc', 'c-tag'].concat(I2C_W) }
+  },
+  sysview: {
+    boxes: [
+      { id: 'b-admin', x: 8,   y: 24,  w: 100, h: 40, name: 'ADMIN',     sub: 'DASHBOARD',   sim: true },
+      { id: 'b-be',    x: 128, y: 24,  w: 104, h: 40, name: 'BACKEND',   sub: '+ DATABASE', sim: true },
+      { id: 'b-pi',    x: 252, y: 24,  w: 96,  h: 40, name: 'PI GATEWAY', sub: 'RASPBERRY PI', sim: true },
+      { id: 'b-esp',   x: 376, y: 24,  w: 100, h: 40, name: 'ESP32-S3',  sub: 'BADGE',      sim: false },
+      { id: 'b-epd',   x: 500, y: 24,  w: 96,  h: 40, name: 'E-INK',     sub: 'DISPLAY',    sim: false },
+      { id: 'b-rd',    x: 128, y: 110, w: 104, h: 40, name: 'NFC READER', sub: 'PN532 + PI', sim: true },
+      { id: 'b-res',   x: 500, y: 110, w: 96,  h: 40, name: 'RESULT',    sub: 'VERIFIED',   sim: false }
+    ],
+    links: [
+      { id: 'l1', pts: [[108, 44], [128, 44]], label: '' },
+      { id: 'l2', pts: [[232, 44], [252, 44]], label: '' },
+      { id: 'l3', pts: [[348, 44], [376, 44]], label: 'WI-FI/BLE (SIM)', lblAt: [362, 38], net: true },
+      { id: 'l4', pts: [[476, 44], [500, 44]], label: 'SPI', lblAt: [488, 38] },
+      { id: 'l5', pts: [[180, 110], [180, 64]], label: 'LAN (SIM)', lblAt: [185, 92], net: true },
+      { id: 'l6', pts: [[222, 64], [222, 86], [548, 86], [548, 110]], label: 'RESULT FEED (SIM)', lblAt: [380, 81], net: true }
+    ]
+  }
+};
+
+// stateMachine: states, durations, illustrative current draw.
+const stateMachine = {
+  order: ['SLEEP', 'WAKE', 'CHECK', 'RECEIVE', 'VERIFY', 'REFRESH', 'SAVE'],
+  meta: {
+    SLEEP:   { label: 'DEEP SLEEP',   draw: '≈ 10 µA', ms: 0 },
+    WAKE:    { label: 'WAKE',         draw: '≈ 40 mA', ms: 900 },
+    CHECK:   { label: 'CHECK UPDATE', draw: '≈ 150 mA', ms: 1500 },
+    RECEIVE: { label: 'RECEIVE',      draw: '≈ 150 mA', ms: 1700 },
+    VERIFY: { label: 'VERIFY',       draw: '≈ 40 mA', ms: 800 },
+    REFRESH: { label: 'REFRESH E-INK', draw: '≈ 20 mA', ms: 2600 },
+    SAVE:    { label: 'SAVE',        draw: '≈ 40 mA', ms: 700 }
+  },
+  current: 'SLEEP',
+  running: false
+};
+
+/* ============================================================ SIM LAYOUT */
+function hhmmss(){
+  const d = new Date();
+  return [d.getHours(), d.getMinutes(), d.getSeconds()].map((n) => String(n).padStart(2, '0')).join(':');
+}
+
+// log(): the single function every feature writes through.
+function log(msg, alert){
+  const host = $('#logPanel');
+  if (!host) return;
+  const line = document.createElement('div');
+  line.className = 'log-line' + (alert ? ' alert' : '');
+  line.textContent = hhmmss() + '  ' + msg;
+  host.appendChild(line);
+  while (host.children.length > 200) host.removeChild(host.firstChild);
+  host.scrollTop = host.scrollHeight;
+}
+
+function buildStrip(){
+  const strip = $('#stateStrip');
+  strip.innerHTML = '';
+  stateMachine.order.forEach((id) => {
+    const n = document.createElement('span');
+    n.className = 'state-node';
+    n.dataset.id = id;
+    n.textContent = stateMachine.meta[id].label;
+    strip.appendChild(n);
+  });
+}
+
+function renderBOM(){
+  let lo = 0, hi = 0;
+  const rows = hardwareConfig.bom.map((b) => {
+    lo += b[1]; hi += b[2];
+    return '<tr><td>' + b[0] + '</td><td>₹' + b[1] + '–' + b[2] + '</td><td>REAL</td></tr>';
+  }).join('');
+  $('#bom').innerHTML =
+    '<thead><tr><th>PART</th><th>COST (INR)</th><th>STATUS</th></tr></thead><tbody>' +
+    rows +
+    '<tr class="tot"><td>TOTAL (APPROX.)</td><td>₹' + lo + '–' + hi + '</td><td>—</td></tr></tbody>';
+}
+
+function buildXray(){
+  const svg = $('#hwsvg');
+  const NS = 'http://www.w3.org/2000/svg';
+  const mk = (tag, attrs, parent) => {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    (parent || svg).appendChild(n);
+    return n;
+  };
+  const txt = (x, y, str, cls, parent, anchor, rotate) => {
+    const t = mk('text', { x: x, y: y, 'class': cls || '' }, parent);
+    if (anchor) t.setAttribute('text-anchor', anchor);
+    if (rotate) t.setAttribute('transform', rotate);
+    t.textContent = str;
+    return t;
+  };
+  const X = hardwareConfig.xray;
+
+  // ghost card outline — thin layer behind components
+  mk('rect', { x: 4, y: 4, width: 294, height: 332, rx: 10, 'class': 'ghostrect' });
+
+  // passive NFC tag / antenna loop (border of the card)
+  const tag = mk('g', { id: 'c-tag', 'class': 'comp' });
+  mk('rect', { x: 8, y: 8, width: 286, height: 324, rx: 9, 'class': 'tagloop' }, tag);
+  txt(16, 19, 'PASSIVE NFC TAG + ANTENNA', 'pinlbl', tag, 'start');
+  mk('rect', { x: 10, y: 10, width: 282, height: 14, 'class': 'hit' }, tag);
+
+  // wires (below the boxes)
+  X.wires.forEach((w) => {
+    mk('polyline', { id: w.id, 'class': 'wire ' + w.kind, points: w.pts.map((p) => p.join(',')).join(' ') });
+  });
+
+  // USB-C connector
+  const usb = mk('g', { id: 'c-usb', 'class': 'comp' });
+  mk('rect', { x: 5, y: 267, width: 12, height: 16, rx: 2, 'class': 'box' }, usb);
+  txt(11, 263, 'USB-C', 'pinlbl', usb, 'middle');
+  mk('rect', { x: 4, y: 260, width: 14, height: 25, 'class': 'hit' }, usb);
+
+  // component boxes
+  [['epd', '2.13" E-INK', 'SPI · 250×122'],
+   ['esp32', 'ESP32-S3', 'DEVKIT · MAIN CTRL'],
+   ['nfc', 'PN532', 'NFC · 13.56 MHZ'],
+   ['tp4056', 'TP4056', 'CHARGER'],
+   ['ldo', '3V3 LDO', 'REG.']].forEach((c) => {
+    const b = X.boxes[c[0]];
+    const g = mk('g', { id: 'c-' + c[0], 'class': 'comp' });
+    mk('rect', { x: b.x, y: b.y, width: b.w, height: b.h, rx: 2, 'class': 'box' }, g);
+    txt(b.x + b.w / 2, b.y + 16, c[1], 'cname', g);
+    txt(b.x + b.w / 2, b.y + 25, c[2], 'csub', g);
+    mk('rect', { x: b.x, y: b.y, width: b.w, height: b.h, 'class': 'hit' }, g);
+  });
+
+  // battery (rotated labels)
+  const bb = X.boxes.batt;
+  const bg = mk('g', { id: 'c-batt', 'class': 'comp' });
+  mk('rect', { x: bb.x, y: bb.y, width: bb.w, height: bb.h, rx: 2, 'class': 'box' }, bg);
+  txt(bb.x + 22, bb.y + 50, 'LI-PO 3.7V', 'cname', bg, 'middle',
+      'rotate(-90 ' + (bb.x + 22) + ' ' + (bb.y + 50) + ')');
+  txt(bb.x + 34, bb.y + 50, '800 mAh', 'csub', bg, 'middle',
+      'rotate(-90 ' + (bb.x + 34) + ' ' + (bb.y + 50) + ')');
+  mk('rect', { x: bb.x, y: bb.y, width: bb.w, height: bb.h, 'class': 'hit' }, bg);
+
+  // Wi-Fi/BLE arcs above the ESP32
+  const wf = mk('g', { id: 'c-wifi' });
+  [3, 6, 9].forEach((r) => {
+    mk('path', { d: 'M ' + (222 - r) + ' 120 A ' + r + ' ' + r + ' 0 0 1 ' + (222 + r) + ' 120', 'class': 'c-wifi' }, wf);
+  });
+  mk('rect', { x: 221, y: 120, width: 2, height: 2, 'class': 'c-wifi' }, wf);
+  txt(222, 132, 'WI-FI/BLE', 'pinlbl', wf, 'middle');
+
+  // pins
+  const g = (id) => document.getElementById('c-' + id);
+  const vStub = (grp, x, ys) => mk('line', { x1: x, y1: ys[0], x2: x, y2: ys[1], 'class': 'stub' }, grp);
+  const hStub = (grp, xs, y) => mk('line', { x1: xs[0], y1: y, x2: xs[1], y2: y, 'class': 'stub' }, grp);
+  const lines = (grp, labels, x, ys, anchor) => {
+    labels.forEach((s, j) => txt(x, ys[j], s, 'pinlbl', grp, anchor));
+  };
+
+  X.pinLbls.epd_bottom.forEach((lbl, i) => {
+    const x = X.pinPos.epd_bottom.xs[i];
+    vStub(g('epd'), x, X.pinPos.epd_bottom.stub);
+    txt(x, X.pinPos.epd_bottom.labelY[0], lbl, 'pinlbl', g('epd'));
+  });
+  X.pinLbls.esp32_top.forEach((lbl, i) => {
+    const x = X.pinPos.esp32_top.xs[i];
+    vStub(g('esp32'), x, X.pinPos.esp32_top.stub);
+    lines(g('esp32'), lbl, x, X.pinPos.esp32_top.labelY);
+  });
+  X.pinLbls.esp32_bottom.forEach((lbl, i) => {
+    const x = X.pinPos.esp32_bottom.xs[i];
+    vStub(g('esp32'), x, X.pinPos.esp32_bottom.stub);
+    lines(g('esp32'), lbl, x, X.pinPos.esp32_bottom.labelY);
+  });
+  X.pinLbls.esp32_left.forEach((lbl, i) => {
+    const y = X.pinPos.esp32_left.ys[i];
+    hStub(g('esp32'), X.pinPos.esp32_left.stub, y);
+    txt(96, y + 1.5, lbl, 'pinlbl', g('esp32'), 'start');
+  });
+  X.pinLbls.nfc_left.forEach((lbl, i) => {
+    const y = X.pinPos.nfc_left.ys[i];
+    hStub(g('nfc'), X.pinPos.nfc_left.stub, y);
+    txt(233, y + 1.5, lbl, 'pinlbl', g('nfc'), 'start');
+  });
+  X.pinLbls.batt_bottom.forEach((lbl, i) => {
+    const x = X.pinPos.batt_bottom.xs[i];
+    vStub(g('batt'), x, X.pinPos.batt_bottom.stub);
+    txt(x, X.pinPos.batt_bottom.labelY[0], lbl, 'pinlbl', g('batt'));
+  });
+  X.pinLbls.tp_top.forEach((lbl, i) => {
+    const x = X.pinPos.tp_top.xs[i];
+    vStub(g('tp4056'), x, X.pinPos.tp_top.stub);
+    txt(x, X.pinPos.tp_top.labelY[0], lbl, 'pinlbl', g('tp4056'));
+  });
+  X.pinLbls.tp_left.forEach((lbl, i) => {
+    const y = X.pinPos.tp_left.ys[i];
+    hStub(g('tp4056'), X.pinPos.tp_left.stub, y);
+    txt(29, y + 1.5, lbl, 'pinlbl', g('tp4056'), 'start');
+  });
+  X.pinLbls.tp_right.forEach((lbl, i) => {
+    const y = X.pinPos.tp_right.ys[i];
+    hStub(g('tp4056'), X.pinPos.tp_right.stub, y);
+    txt(111, y + 1.5, lbl, 'pinlbl', g('tp4056'), 'end');
+  });
+  X.pinLbls.ldo_left.forEach((lbl, i) => {
+    const y = X.pinPos.ldo_left.ys[i];
+    hStub(g('ldo'), X.pinPos.ldo_left.stub, y);
+    txt(158, y + 1.5, lbl, 'pinlbl', g('ldo'), 'start');
+  });
+  X.pinLbls.ldo_top.forEach((lbl, i) => {
+    const x = X.pinPos.ldo_top.xs[i];
+    vStub(g('ldo'), x, X.pinPos.ldo_top.stub);
+    txt(x, X.pinPos.ldo_top.labelY[0], lbl, 'pinlbl', g('ldo'));
+  });
+
+  // hover / click on components
+  ['epd', 'esp32', 'nfc', 'batt', 'tp4056', 'ldo', 'tag'].forEach((id) => {
+    const c = document.getElementById('c-' + id);
+    c.addEventListener('pointerenter', () => highlightWiresOf(id, true));
+    c.addEventListener('pointerleave', () => {
+      if (!c.classList.contains('sel')) highlightWiresOf(id, false);
+    });
+    c.addEventListener('click', (e) => { e.stopPropagation(); selectComponent(id); });
+  });
+}
+
+function highlightWiresOf(compId, on){
+  hardwareConfig.xray.wires.forEach((w) => {
+    if (w.from === compId || w.to === compId){
+      const el = document.getElementById(w.id);
+      if (el) el.classList.toggle('hi', on);
+    }
+  });
+}
+
+function deselectComponent(){
+  $$('#hwsvg .comp.sel').forEach((n) => n.classList.remove('sel'));
+  $$('#hwsvg .wire.hi').forEach((n) => n.classList.remove('hi'));
+}
+
+function selectComponent(id){
+  const p = hardwareConfig.parts[id];
+  if (!p) return;
+  deselectComponent();
+  const c = document.getElementById('c-' + id);
+  if (c) c.classList.add('sel');
+  highlightWiresOf(id, true);
+
+  let html = '<p class="d-name">' + p.name + '</p><p class="d-sub">' + p.sub + '</p>' +
+    '<div class="d-row"><span class="d-k">PURPOSE</span><span>' + p.purpose + '</span></div>' +
+    '<div class="d-row"><span class="d-k">VOLTAGE</span><span>' + p.volt + '</span></div>' +
+    '<div class="d-row"><span class="d-k">INTERFACE</span><span>' + p.iface + '</span></div>' +
+    '<div class="d-row"><span class="d-k">COST (INR)</span><span>' + p.cost + '</span></div>' +
+    '<div class="d-row"><span class="d-k">STATUS</span><span>' + p.status + ' · VIEW <span class="sim-tag">SIMULATED</span></span></div>';
+  const maps = [];
+  if (id === 'epd' || id === 'esp32') maps.push(hardwareConfig.pinMaps.EPD_SPI);
+  if (id === 'nfc' || id === 'esp32') maps.push(hardwareConfig.pinMaps.PN532_I2C);
+  if (id === 'batt' || id === 'tp4056' || id === 'ldo') maps.push(hardwareConfig.pinMaps.POWER);
+  maps.forEach((m) => {
+    html += '<div class="d-pin"><div class="d-k">' + m.title + ' — ' + hardwareConfig.pinNote + '</div>' +
+      m.rows.map((r) => '<div>' + r[0] + ' → <b>' + r[1] + '</b></div>').join('') + '</div>';
+  });
+  if (id === 'tag'){
+    html += '<div class="d-pin"><div class="d-k">COUPLING</div><div>Battery-less — standard gate readers can read it even when the badge is dead or offline.</div></div>';
+  }
+  $('#detail').innerHTML = html;
+  $('#detailTag').textContent = p.status;
+  log('SELECT PART: ' + p.name);
+}
+
+function buildSysview(){
+  const svg = $('#syssvg');
+  const NS = 'http://www.w3.org/2000/svg';
+  const mk = (tag, attrs, parent) => {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    (parent || svg).appendChild(n);
+    return n;
+  };
+  const S = hardwareConfig.sysview;
+
+  S.links.forEach((l) => {
+    mk('polyline', { id: l.id, 'class': 'sys-link' + (l.net ? ' net' : ''), points: l.pts.map((p) => p.join(',')).join(' ') });
+    const a = l.pts[l.pts.length - 2], b = l.pts[l.pts.length - 1];
+    const dx = b[0] - a[0], dy = b[1] - a[1];
+    const len = Math.hypot(dx, dy) || 1;
+    const ux = dx / len, uy = dy / len;
+    const tri = [[b[0], b[1]],
+      [b[0] - 6 * ux + 3 * uy, b[1] - 6 * uy - 3 * ux],
+      [b[0] - 6 * ux - 3 * uy, b[1] - 6 * uy + 3 * ux]];
+    mk('polygon', { points: tri.map((p) => p.join(',')).join(' '), fill: 'var(--ink)' });
+    if (l.label){
+      const t = mk('text', { x: l.lblAt[0], y: l.lblAt[1], 'class': 'llbl' });
+      t.textContent = l.label;
+    }
+  });
+
+  S.boxes.forEach((b) => {
+    const grp = mk('g', { id: b.id, 'class': 'sys-box' });
+    mk('rect', { x: b.x, y: b.y, width: b.w, height: b.h }, grp);
+    const t1 = mk('text', { x: b.x + b.w / 2, y: b.y + 16, 'class': 'bname' }, grp);
+    t1.textContent = b.name;
+    const t2 = mk('text', { x: b.x + b.w / 2, y: b.y + 27, 'class': 'bsub' }, grp);
+    t2.textContent = b.sub;
+    if (b.sim){
+      mk('rect', { x: b.x + b.w - 30, y: b.y - 12, width: 25, height: 9, fill: 'var(--ink)' }, grp);
+      const s = mk('text', { x: b.x + b.w - 17.5, y: b.y - 5.5, 'class': 'simchip' }, grp);
+      s.textContent = 'SIM';
+    }
+  });
+}
+
+// renderCard(face, data): draws a card face's dynamic fields from studentData.
+function renderCard(face, data){
+  const setField = (sel, val) => {
+    const el = $(sel);
+    el.dataset.scramble = val;
+    el.setAttribute('aria-label', val);
+    el.querySelector('.scr-inner').textContent = val;
+  };
+  if (face === 'front' || face === 'all'){
+    $('#prog-line').textContent = data.program + ' · BATCH ' + data.batch + ' · SEM ' + data.semester;
+    const st = $('#stamp');
+    st.textContent = data.active ? 'ACTIVE' : 'INACTIVE';
+    st.classList.toggle('off', !data.active);
+    st.setAttribute('aria-label', data.active ? 'Status stamp: ACTIVE' : 'Status stamp: INACTIVE');
+  }
+  if (face === 'back' || face === 'all'){
+    setField('#sem-val', data.semester);
+    setField('#att-val', data.attendance + '%');
+    setField('#hall-val', data.examHall);
+    setField('#seat-val', data.seat);
+  }
+}
+
+function applyXrayMode(mode){
+  const svg = $('#hwsvg');
+  if (!svg) return;
+  const m = hardwareConfig.modes[mode] || hardwareConfig.modes.IDLE;
+  svg.dataset.mode = mode;
+  $$('#hwsvg [id]').forEach((n) => {
+    n.classList.toggle('dim', m.keep !== 'ALL' && !m.keep.includes(n.id));
+    n.classList.toggle('hot', m.hot.includes(n.id));
+  });
+  const meta = stateMachine.meta[mode];
+  const hm = $('#hwMode');
+  hm.textContent = 'MODE: ' + (mode === 'NFC' ? 'NFC EXCHANGE · ≈ 40 mA' : (meta ? meta.label + ' · ' + meta.draw : mode));
+  hm.classList.toggle('hot', mode !== 'IDLE' && mode !== 'SLEEP');
+}
+
+function setCardState(id){
+  stateMachine.current = id;
+  $$('.state-node').forEach((n) => n.classList.toggle('active', n.dataset.id === id));
+  const meta = stateMachine.meta[id];
+  $('#ro-state').textContent = meta.label;
+  $('#ro-state').classList.toggle('hot', id !== 'SLEEP');
+  $('#ro-draw').innerHTML = meta.draw + ' <span class="mini">(ILLUSTRATIVE, NOT MEASURED)</span>';
+  applyXrayMode(id);
+}
+
+/* ============================================================ SIM EINK */
+// refreshDisplay(): full panel rewrite — black, white, black, white,
+// then new content + stepped ghost fade. (~2 s; real panel swaps in later.)
+function refreshDisplay(applyFn){
+  return new Promise((resolve) => {
+    const f = $('#flash');
+    if (REDUCED){
+      if (applyFn) applyFn();
+      countRefresh();
+      stampIn();
+      resolve();
+      return;
+    }
+    f.className = 'flash ink';
+    window.setTimeout(() => { f.className = 'flash paper'; }, 300);
+    window.setTimeout(() => { f.className = 'flash ink'; }, 600);
+    window.setTimeout(() => {
+      if (applyFn) applyFn();          // swap during the last black frame
+      f.className = 'flash paper';
+    }, 900);
+    window.setTimeout(() => {
+      f.className = 'flash';
+      ghostFade();
+      countRefresh();
+      stampIn();
+      window.setTimeout(resolve, 800);
+    }, 1200);
+  });
+}
+
+// stepped ghosting decay of the previous image
+function ghostFade(){
+  const g = $('#ghost');
+  if (!g) return;
+  [0.5, 0.32, 0.16, 0].forEach((o, i) => window.setTimeout(() => { g.style.opacity = o; }, i * 200));
+}
+
+function countRefresh(){
+  sim.refreshCount++;
+  sim.lastRefresh = hhmm();
+  $('#ro-count').textContent = sim.refreshCount;
+  $('#ro-last').textContent = sim.lastRefresh;
+}
+
+/* ============================================================ SIM KINETIC */
+// sendPacket(): a small square travels a system-view link in discrete steps.
+function sendPacket(linkId, rev){
+  return new Promise((resolve) => {
+    if (REDUCED){ resolve(); return; }
+    const link = hardwareConfig.sysview.links.find((l) => l.id === linkId);
+    const svg = $('#syssvg');
+    if (!link || !svg){ resolve(); return; }
+    const pts = rev ? link.pts.slice().reverse() : link.pts.slice();
+    const segs = [];
+    let total = 0;
+    for (let i = 0; i < pts.length - 1; i++){
+      const d = Math.hypot(pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1]);
+      segs.push(d); total += d;
+    }
+    const steps = Math.max(4, Math.round(total / 12));
+    const pkt = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    pkt.setAttribute('width', 6); pkt.setAttribute('height', 6);
+    pkt.setAttribute('class', 'pkt');
+    svg.appendChild(pkt);
+    let i = 0;
+    const iv = window.setInterval(() => {
+      i++;
+      const dist = Math.min(total, (i / steps) * total);
+      let d = 0, x = pts[0][0], y = pts[0][1];
+      for (let s = 0; s < segs.length; s++){
+        if (d + segs[s] >= dist){
+          const t = segs[s] ? (dist - d) / segs[s] : 0;
+          x = pts[s][0] + (pts[s + 1][0] - pts[s][0]) * t;
+          y = pts[s][1] + (pts[s + 1][1] - pts[s][1]) * t;
+          break;
+        }
+        d += segs[s]; x = pts[s + 1][0]; y = pts[s + 1][1];
+      }
+      pkt.setAttribute('x', Math.round(x) - 3);
+      pkt.setAttribute('y', Math.round(y) - 3);
+      if (i >= steps){
+        window.clearInterval(iv);
+        pkt.remove();
+        resolve();
+      }
+    }, 42);
+  });
+}
+
+// doSlide(): moves the whole card toward/away from the reader in discrete steps.
+function doSlide(target){
+  return new Promise((resolve) => {
+    const sl = $('#slide');
+    if (REDUCED){
+      sl.style.transform = 'translate(' + target.x + 'px,' + target.y + 'px)';
+      resolve();
+      return;
+    }
+    const steps = 14;
+    let i = 0;
+    const iv = window.setInterval(() => {
+      i++;
+      const t = i / steps;
+      sl.style.transform = 'translate(' + Math.round(target.x * t) + 'px,' + Math.round(target.y * t) + 'px)';
+      if (i >= steps){ window.clearInterval(iv); resolve(); }
+    }, 34);
+  });
+}
+
+function computeSlide(){
+  const c = $('#card').getBoundingClientRect();
+  const r = $('#reader').getBoundingClientRect();
+  const dx = (r.left + r.width / 2) - (c.left + c.width / 2);
+  const dy = (r.top + r.height / 2) - (c.top + c.height / 2);
+  const k = 0.72;
+  return { x: Math.round(dx * k / uiScale), y: Math.round(dy * k / uiScale) };
+}
+
+// gate token: card ID + time slot + fake signature, regenerates every 30 s.
+function fnv(str){
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++){
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return ('000' + (h >>> 0).toString(16).toUpperCase()).slice(-4);
+}
+
+function makeToken(){
+  sim.token.slot = Math.floor(Date.now() / 30000);
+  sim.token.madeAt = Math.floor(Date.now() / 1000);
+  sim.token.sig = fnv(DEVICE_ID + '.' + sim.token.slot + '.DSU-DEMO-KEY');
+}
+
+function tokenTick(){
+  const remain = 30 - Math.floor((Date.now() % 30000) / 1000);
+  if (sim.online && !sim.token.tamper) makeToken();
+  const t = $('#tokenLbl'), u = $('#tokenTtl');
+  if (!t) return;
+  t.textContent = 'GATE TOKEN ' + sim.token.sig +
+    (sim.token.tamper ? ' · TAMPERED' : '') +
+    (!sim.active ? ' · CARD INACTIVE' : '');
+  u.textContent = sim.online ? 'T-' + String(remain).padStart(2, '0') + 's' : 'OFFLINE · FROZEN';
+}
+
+function readerSet(state, text){
+  const led = $('#readerLed'), lcd = $('#readerLcd');
+  led.className = 'reader-led' + (state ? ' ' + state : '');
+  lcd.textContent = text;
+  lcd.classList.toggle('bad', state === 'bad');
+}
+
+/* ============================================================ SIM LOGIC */
+// runCycle(): WAKE → CHECK → RECEIVE → VERIFY → REFRESH E-INK → SAVE → SLEEP.
+// Offline: fails at CHECK, keeps the last image (E-Ink persistence).
+function runCycle(applyChanges){
+  return new Promise((resolve) => {
+    if (stateMachine.running){ resolve(false); return; }
+    stateMachine.running = true;
+    sim.busy = true;
+    const finish = (synced) => {
+      setCardState('SLEEP');
+      log('ENTERING DEEP SLEEP');
+      stateMachine.running = false;
+      sim.busy = false;
+      resolve(synced);
+    };
+    (async () => {
+      setCardState('WAKE');
+      log('WAKE FROM DEEP SLEEP');
+      await wait(REDUCED ? 60 : stateMachine.meta.WAKE.ms);
+
+      setCardState('CHECK');
+      log('GET /device/' + DEVICE_ID + '/update');
+      if (!sim.online){
+        log('NETWORK UNREACHABLE — SYNC FAILED', 1);
+        log('E-INK KEEPS LAST IMAGE (BISTABLE · ZERO POWER)', 1);
+        await wait(REDUCED ? 60 : 700);
+        finish(false);
+        return;
+      }
+      await sendPacket('l3', true);
+      await sendPacket('l2', true);
+      await wait(REDUCED ? 60 : 300);
+
+      setCardState('RECEIVE');
+      await sendPacket('l2');
+      await sendPacket('l3');
+      log('UPDATE RECEIVED, SIGNATURE OK');
+      await wait(REDUCED ? 60 : 400);
+
+      setCardState('VERIFY');
+      log('VERIFY: HMAC-SHA256 · TOKEN OK');
+      await wait(REDUCED ? 60 : stateMachine.meta.VERIFY.ms);
+
+      setCardState('REFRESH');
+      log('REFRESHING E-INK PANEL…');
+      await sendPacket('l4');
+      await refreshDisplay(() => {
+        if (applyChanges) applyChanges();
+        renderCard('all', studentData);
+        scrambleAll();
+        setClockNow();
+      });
+      log('DISPLAY REFRESHED · GHOSTING FADING');
+
+      setCardState('SAVE');
+      log('STATE SAVED TO NVS FLASH');
+      await wait(REDUCED ? 60 : stateMachine.meta.SAVE.ms);
+      finish(true);
+    })();
+  });
+}
+
+async function adminSync(vals){
+  if (sim.busy){ log('BUSY — SYNC IGNORED', 1); return; }
+  if (vals){
+    Object.assign(studentData, vals);
+    log('ADMIN PUSH: SEM ' + studentData.semester + ' · ATT ' + studentData.attendance +
+      '% · HALL ' + studentData.examHall + ' · SEAT ' + studentData.seat);
+  }
+  log('SYNC CYCLE START');
+  await runCycle();
+}
+
+async function nfcTap(){
+  if (sim.busy){ log('BUSY — TAP IGNORED', 1); return; }
+  sim.busy = true;
+  const mode = sim.nfcMode;
+  log('NFC TAP · MODE: ' + mode);
+  applyXrayMode('NFC');
+  readerSet('amber', 'READING…');
+  const target = computeSlide();
+  await doSlide(target);
+  await wait(REDUCED ? 150 : 800);
+  if (sim.active){
+    readerSet('ok', 'STUDENT VERIFIED · ' + studentData.id + ' · ' + mode);
+    log('NFC TAP: ' + mode + ', verified');
+    if (mode === 'ATTENDANCE') log('ATTENDANCE MARKED · PERIOD OK');
+  } else {
+    readerSet('bad', 'DENIED · CARD INACTIVE');
+    log('NFC TAP: ' + mode + ', DENIED — CARD INACTIVE', 1);
+  }
+  await sendPacket('l5');
+  await sendPacket('l6');
+  await wait(REDUCED ? 100 : 900);
+  readerSet('', 'READY');
+  await doSlide({ x: 0, y: 0 });
+  applyXrayMode(stateMachine.current);
+  sim.busy = false;
+}
+
+async function scanGate(){
+  if (sim.busy){ log('BUSY — SCAN IGNORED', 1); return; }
+  sim.busy = true;
+  log('GATE SCANNER: READING QR…');
+  readerSet('amber', 'SCANNING…');
+  await wait(REDUCED ? 80 : 900);
+  const age = Math.floor(Date.now() / 1000) - sim.token.madeAt;
+  let msg, bad = false;
+  if (!sim.active){ msg = 'DENIED · CARD INACTIVE'; bad = true; }
+  else if (sim.token.tamper){
+    msg = 'INVALID · SIGNATURE MISMATCH'; bad = true;
+    sim.token.tamper = false;
+    log('TAMPER FLAG CLEARED AFTER DETECTION', 1);
+  }
+  else if (age > 30){ msg = 'EXPIRED · TOKEN STALE'; bad = true; }
+  else { msg = 'VERIFIED · TOKEN ' + sim.token.sig + ' · SEAT ' + studentData.seat; }
+  readerSet(bad ? 'bad' : 'ok', msg);
+  log('SCAN GATE CODE: ' + msg, bad ? 1 : 0);
+  await wait(REDUCED ? 80 : 1000);
+  readerSet('', 'READY');
+  tokenTick();
+  sim.busy = false;
+}
+
+function tamperToken(){
+  sim.token.tamper = true;
+  sim.token.sig = fnv(DEVICE_ID + '.EVIL.' + Math.floor(Date.now() / 1000));
+  log('TOKEN TAMPERED — SIGNATURE BROKEN', 1);
+  tokenTick();
+}
+
+function setOnline(on){
+  sim.online = on;
+  const b = $('#btnOffline');
+  b.setAttribute('aria-pressed', String(!on));
+  b.textContent = on ? 'GO OFFLINE' : 'BACK ONLINE';
+  $('#ro-net').textContent = on ? 'ONLINE' : 'OFFLINE';
+  $('#ro-net').classList.toggle('off', !on);
+  log(on ? 'NETWORK: ONLINE' : 'NETWORK: OFFLINE — SYNC WILL FAIL GRACEFULLY', on ? 0 : 1);
+  if (!on) log('QR TOKEN FREEZES — WILL EXPIRE IN ≤ 30 s');
+}
+
+function setBattery(p){
+  sim.battery = p;
+  $('#battVal').textContent = p + '%';
+  $('#ro-batt').textContent = p + '%';
+  const bars = $$('.bbar');
+  const n = p > 66 ? 3 : p > 33 ? 2 : p > 10 ? 1 : 0;
+  bars.forEach((b, i) => { b.style.visibility = i < n ? 'visible' : 'hidden'; });
+  const low = p < 15;
+  $('#lowbatt').classList.toggle('on', low);
+  $('#ro-batt').classList.toggle('lowtext', low);
+  updateLife();
+}
+
+function updateLife(){
+  const capacity = 800;                        // mAh
+  const perSync = 0.167;                       // mAh per sync cycle — illustrative
+  const quiescent = 1.2;                        // mA avg incl. LDO + charger — illustrative
+  const daily = quiescent * 24 + perSync * 12;  // 12 syncs/day
+  const days = Math.max(0, (capacity * sim.battery / 100) / daily);
+  $('#ro-life').innerHTML = '≈ ' + days.toFixed(1) +
+    ' DAYS <span class="mini">@ 12 SYNC/DAY · ILLUSTRATIVE</span>';
+}
+
+function setActive(a){
+  if (sim.busy){ log('BUSY — TRY AGAIN', 1); return; }
+  sim.active = a;
+  studentData.active = a;
+  const b = $('#btnDeact');
+  b.setAttribute('aria-pressed', String(!a));
+  b.textContent = a ? 'DEACTIVATE CARD' : 'REACTIVATE CARD';
+  log(a ? 'ADMIN: CARD REACTIVATED' : 'ADMIN: CARD DEACTIVATED', a ? 0 : 1);
+  eInkRefresh(() => renderCard('front', studentData));
+  tokenTick();
+}
+
+function presenterStop(msg){
+  sim.presenting = false;
+  const btn = $('#btnPresent');
+  btn.textContent = 'PRESENTER MODE';
+  btn.classList.remove('on');
+  if (msg) log(msg);
+}
+
+// presenterRun(): walks the whole demo once, ~60 s, stoppable.
+async function presenterRun(){
+  if (sim.presenting){ presenterStop('PRESENTER MODE STOPPED'); return; }
+  sim.presenting = true;
+  const btn = $('#btnPresent');
+  btn.textContent = 'STOP PRESENTER';
+  btn.classList.add('on');
+  log('PRESENTER MODE START (~60 s)', 1);
+  const alive = () => sim.presenting;
+
+  if (alive()){ log('PRESENTER 1/6: ADMIN SYNC'); await adminSync({ semester: '6', attendance: '95', examHall: 'H-210', seat: 'B-12' }); }
+  await wait(500);
+  if (!alive()) return presenterStop();
+
+  if (alive()){ log('PRESENTER 2/6: HARDWARE X-RAY WALK'); await gotoFace('hw'); }
+  for (const id of ['esp32', 'epd', 'nfc', 'batt', 'tp4056', 'ldo', 'tag']){
+    if (!alive()) break;
+    selectComponent(id);
+    await wait(1100);
+  }
+  deselectComponent();
+  await wait(400);
+  if (!alive()) return presenterStop();
+
+  if (alive()){ log('PRESENTER 3/6: NFC TAP · ' + sim.nfcMode); await gotoFace('front'); await nfcTap(); }
+  await wait(300);
+  if (!alive()) return presenterStop();
+
+  if (alive()){ log('PRESENTER 4/6: SCAN GATE CODE'); await scanGate(); }
+  if (alive()){ log('PRESENTER 5/6: TAMPER + RESCAN'); tamperToken(); await wait(400); await scanGate(); }
+  await wait(300);
+  if (!alive()) return presenterStop();
+
+  if (alive()){
+    log('PRESENTER 6/6: OFFLINE RESILIENCE');
+    setOnline(false);
+    await wait(300);
+    await adminSync();
+  }
+  if (alive()){ setOnline(true); await wait(300); await adminSync(); }
+  presenterStop('PRESENTER MODE COMPLETE');
+}
+
+function bindSimEvents(){
+  $('#btnHardware').addEventListener('click', () => { if (FACE !== 'hw') gotoFace('hw'); });
+
+  $$('.mode').forEach((b) => b.addEventListener('click', () => {
+    sim.nfcMode = b.dataset.mode;
+    $$('.mode').forEach((x) => x.classList.toggle('on', x === b));
+    log('READER MODE: ' + sim.nfcMode);
+  }));
+
+  $('#btnTap').addEventListener('click', nfcTap);
+
+  $('#btnSync').addEventListener('click', () => {
+    const f = $('#adminForm');
+    f.hidden = !f.hidden;
+  });
+  $('#afRun').addEventListener('click', () => {
+    $('#adminForm').hidden = true;
+    adminSync({
+      semester: $('#afSem').value.trim() || studentData.semester,
+      attendance: $('#afAtt').value.trim() || studentData.attendance,
+      examHall: $('#afHall').value.trim() || studentData.examHall,
+      seat: $('#afSeat').value.trim() || studentData.seat
+    });
+  });
+  $('#afCancel').addEventListener('click', () => { $('#adminForm').hidden = true; });
+
+  $('#btnScan').addEventListener('click', scanGate);
+  $('#btnTamper').addEventListener('click', tamperToken);
+  $('#btnOffline').addEventListener('click', () => setOnline(!sim.online));
+  $('#btnDeact').addEventListener('click', () => setActive(!sim.active));
+  $('#btnPresent').addEventListener('click', presenterRun);
+
+  $('#btnBom').addEventListener('click', () => {
+    const b = $('#bom');
+    b.hidden = !b.hidden;
+    $('#btnBom').setAttribute('aria-expanded', String(!b.hidden));
+    $('#btnBom').textContent = 'BILL OF MATERIALS ' + (b.hidden ? '▸' : '▾');
+  });
+
+  $('#btnSys').addEventListener('click', () => {
+    const s = $('#sysBody');
+    s.hidden = !s.hidden;
+    $('#btnSys').setAttribute('aria-expanded', String(!s.hidden));
+    $('#btnSys').textContent = 'SYSTEM VIEW ' + (s.hidden ? '▸' : '▾');
+  });
+
+  const sl = $('#battSlider');
+  sl.addEventListener('input', () => setBattery(parseInt(sl.value, 10)));
+  sl.addEventListener('change', () => log('BATTERY SET TO ' + sl.value + '%'));
+}
+
+/* ============================================================ LOGIC */
+function hhmm(){
+  const d = new Date();
+  return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+}
+function setClockNow(){
+  $('#clock').textContent = 'REFRESHED ' + hhmm();
+}
+
+function setClockNow(){
+  $('#clock').textContent = 'REFRESHED ' + hhmm();
+  $('#ro-last').textContent = hhmm();
+}
+
+// three-face cycle: FRONT -> BACK -> HARDWARE X-RAY -> FRONT
+function showFace(f){
+  FACE = f;
+  document.querySelector('.face.front').classList.toggle('is-hidden', f !== 'front');
+  document.querySelector('.face.back').classList.toggle('is-hidden', f !== 'back');
+  document.querySelector('.face.hw').classList.toggle('is-hidden', f !== 'hw');
+  $('#card').setAttribute('aria-label',
+    'Student ID card, ' + studentData.name + ', ' + studentData.id + '. Showing ' +
+    (f === 'hw' ? 'hardware x-ray' : f + ' side') + '. Activate to flip.');
+}
+
+function flip(){
+  gotoFace(FACES[(FACES.indexOf(FACE) + 1) % FACES.length]);
+}
+
+// gotoFace(): e-ink refresh flash, face swap during the black frame.
+function gotoFace(f){
+  return new Promise((res) => {
+    if (f === FACE){ res(); return; }
+    eInkRefresh(() => {
+      showFace(f);
+      scrambleAll();
+      log('FLIP → ' + (f === 'hw' ? 'HARDWARE X-RAY' : f.toUpperCase()) + ' FACE');
+    }, res);
+  });
+}
+
+function doRefresh(){
+  eInkRefresh(() => {
+    setClockNow();
+    scrambleAll();
+  });
+}
+
+function doInvert(){
+  eInkRefresh(() => {
+    INV = !INV;
+    $('#card').classList.toggle('inv', INV);
+    $('#btnInvert').setAttribute('aria-pressed', String(INV));
+    drawPortrait(INV);
+    drawQR(INV);
+    scrambleAll();
+  });
+}
+
+function bindEvents(){
+  $('#card').addEventListener('click', flip);
+  $('#btnRefresh').addEventListener('click', doRefresh);
+  $('#btnInvert').addEventListener('click', doInvert);
+  window.addEventListener('resize', fit);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.code !== 'Space' && e.code !== 'Enter') return;
+    if (e.repeat) return;
+    const t = e.target;
+    const tag = t ? t.tagName : '';
+    if (tag === 'INPUT' || tag === 'BUTTON' || tag === 'SELECT' || tag === 'TEXTAREA' || (t && t.isContentEditable)) return;
+    e.preventDefault();
+    flip();
+  });
+}
+
+(function init(){
+  buildName();
+  fitName();
+  buildBarcode();
+  drawPortrait(false);
+  drawQR(false);
+  loadPhoto();
+  setupMarquee();
+  if (document.fonts && document.fonts.ready){
+    document.fonts.ready.then(() => { setupMarquee(); fitName(); });   // re-measure once fonts land
+  }
+  setClockNow();
+  scrambleAll();
+  bindPointer();
+  bindEvents();
+  fit();
+  // ---- hardware simulation boot ----
+  buildXray();
+  buildSysview();
+  buildStrip();
+  renderBOM();
+  renderCard('all', studentData);
+  setCardState('SLEEP');
+  setBattery(87);
+  makeToken();
+  tokenTick();
+  window.setInterval(tokenTick, 1000);
+  bindSimEvents();
+  log('E-INK BADGE SIM BOOTED · ALL PARTS VIRTUAL');
+  log('DEEP SLEEP · ONLY THE BATTERY PATH IS LIVE');
+  if (!REDUCED) window.setTimeout(stampIn, 700);
+  window.setInterval(() => regionFlicker($('#statusbar'), setClockNow), 60000);
+})();
+</script>
+</body>
+</html>
