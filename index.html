@@ -174,11 +174,11 @@ body{
 
 /* ============================================================ SIM */
 /* page head + bench */
-.sim-head{text-align:center;margin-bottom:2px}
+.sim-head{width:100%;display:grid;place-items:center}
 .sim-title{font-family:var(--font-d);font-weight:700;font-size:17px;letter-spacing:.14em}
 .sim-title .thin{color:var(--g3);font-weight:500}
-.sim-legend{font-size:7px;font-weight:500;letter-spacing:.22em;color:var(--g3);margin-top:5px;line-height:1.9}
-.bench{display:grid;grid-template-columns:340px minmax(260px,330px);gap:16px;justify-content:center;align-items:start;width:100%}
+.sim-legend{font-size:7px;font-weight:700;letter-spacing:.18em;color:var(--g3);margin-top:4px;line-height:1.9}
+.bench{display:grid;grid-template-columns:auto minmax(260px,330px);gap:16px;justify-content:center;align-items:start;width:100%}
 .card-col{display:grid;justify-items:center;gap:12px;min-width:0}
 .slide{position:relative;z-index:3}
 .side-col{display:grid;gap:10px;min-width:0}
@@ -328,6 +328,32 @@ body.is-busy .panel.hot{opacity:1}
 .side-col #panel-bom{order:3}
 .side-col #panel-detail{order:4}
 
+/* ---- hardware bench shell ---- */
+.hero{display:flex;justify-content:space-between;align-items:center;gap:16px;width:min(712px,100%);border:3px double var(--ink);background:var(--paper);padding:12px 14px}
+.hero-left{min-width:0}
+.hero-cta{font-family:var(--font-d);font-weight:700;font-size:13px;letter-spacing:.14em;text-indent:.14em;background:var(--ink);color:var(--paper);border:2px solid var(--ink);padding:13px 18px;cursor:pointer;white-space:nowrap;flex:none}
+.hero-cta:active{transform:translate(0,2px)}
+.hero-cta.on{outline:2px solid var(--red);outline-offset:2px}
+.demolist{display:flex;flex-wrap:wrap;gap:4px 14px;list-style:none;margin-top:9px;font-size:7px;font-weight:700;letter-spacing:.18em;color:var(--g3)}
+.demolist li{display:flex;align-items:center;gap:5px}
+.demolist li::before{content:'';width:8px;height:8px;border:1px solid var(--ink);flex:none}
+.demolist li.done{color:var(--ink)}
+.demolist li.done::before{background:var(--ink)}
+@media (max-width:760px){.hero{flex-direction:column;align-items:stretch}}
+
+.plinth{position:relative;border:3px double var(--ink);background:var(--paper);padding:16px 16px 12px}
+.screw{position:absolute;width:7px;height:7px;border:1px solid var(--ink);border-radius:50%;background:repeating-linear-gradient(45deg,var(--g1) 0 1px,transparent 1px 3px)}
+.screw.tl{top:6px;left:6px}.screw.tr{top:6px;right:6px}.screw.bl{bottom:6px;left:6px}.screw.br{bottom:6px;right:6px}
+.plate{margin-top:10px;font-size:6.5px;font-weight:700;letter-spacing:.22em;text-indent:.22em;color:var(--g3);border:1px solid var(--g2);padding:3px 8px 2px;text-align:center;width:100%}
+
+.nolink{display:none;font-size:6.5px;font-weight:700;letter-spacing:.14em;color:var(--red)}
+.nolink.on{display:inline}
+.state-cap{margin:8px 0 6px}
+.gate-div{border:none;border-top:1px solid var(--g2);margin:10px 0 8px}
+.diag-cap{margin-bottom:8px}
+.panel.simdev{border:1.5px dashed var(--ink)}
+.panel.simdev .panel-head{background:repeating-linear-gradient(45deg,var(--g1) 0 2px,transparent 2px 6px);padding:3px 6px 2px;border-bottom:1px dashed var(--g2);margin-bottom:10px}
+
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation:none !important;transition:none !important}
   .stamp{opacity:1 !important;transform:rotate(-8deg) scale(1) !important}
@@ -338,12 +364,24 @@ body.is-busy .panel.hot{opacity:1}
 <body>
 <main class="stage">
   <header class="sim-head">
-    <h2 class="sim-title">DSU E-INK BADGE <span class="thin">· HARDWARE SIMULATION</span></h2>
-    <p class="sim-legend">REAL IN FINAL SYSTEM: E-INK PANEL · ESP32-S3 · PN532 · BATTERY&nbsp;&nbsp;—&nbsp;&nbsp;SIMULATED NOW: READER · NETWORK · GATEWAY · BACKEND</p>
+    <div class="hero">
+      <div class="hero-left">
+        <h2 class="sim-title">DSU SMART BADGE <span class="thin">· HARDWARE SIM</span></h2>
+        <p class="sim-legend">REAL: E-INK · ESP32-S3 · PN532 · BATTERY (SOLID BORDER) — SIMULATED: READER · NETWORK · GATEWAY · BACKEND (HATCHED PANEL)</p>
+        <ul class="demolist" id="demoList">
+          <li data-demo="sync">SYNC ADMIN DATA</li>
+          <li data-demo="tap">TAP CARD</li>
+          <li data-demo="scan">SCAN GATE CODE</li>
+          <li data-demo="break">BREAK IT — OFFLINE / TAMPER</li>
+        </ul>
+      </div>
+      <button class="hero-cta" id="btnPresentHero" type="button" aria-label="Run the presenter auto demo">▶ PRESENTER MODE</button>
+    </div>
   </header>
 
   <div class="bench">
-  <div class="card-col">
+  <div class="card-col plinth">
+  <i class="screw tl" aria-hidden="true"></i><i class="screw tr" aria-hidden="true"></i><i class="screw bl" aria-hidden="true"></i><i class="screw br" aria-hidden="true"></i>
   <p class="zone-cap">01 · THE BADGE</p>
   <div class="scaler" id="scaler">
     <div class="slide" id="slide">
@@ -364,6 +402,7 @@ body.is-busy .panel.hot{opacity:1}
                 <rect class="bbar" x="7" y="2" width="2" height="5" fill="currentColor"/>
               </svg>
               <span class="lowbatt" id="lowbatt">LOW BATT</span>
+              <span class="nolink" id="nolink">NO LINK</span>
               <span class="clock" id="clock">REFRESHED --:--</span>
             </span>
             <span class="rf" aria-hidden="true"></span>
@@ -498,24 +537,12 @@ body.is-busy .panel.hot{opacity:1}
     <button class="ctrl" id="btnHardware" type="button" aria-label="Show the hardware x-ray face">HARDWARE</button>
   </div>
   <p class="hint">E-INK BADGE · DSU REV 2.4<br>CLICK CARD OR SPACE / ENTER — CYCLE FACES · X-RAY: CLICK A PART</p>
+  <p class="plate">DSU SMART BADGE · REV 2.4 · UNIT UNDER TEST</p>
   </div><!-- /card-col -->
 
   <aside class="side-col">
-    <div class="panel" id="panel-readout">
-      <div class="panel-head"><span>LIVE READOUT</span><span class="sim-tag">SIMULATED</span></div>
-      <dl class="readouts">
-        <dt>STATE</dt><dd id="ro-state">DEEP SLEEP</dd>
-        <dt>BATTERY</dt><dd id="ro-batt">87%</dd>
-        <dt>NETWORK</dt><dd id="ro-net">ONLINE</dd>
-        <dt>LAST REFRESH</dt><dd id="ro-last">--:--</dd>
-        <dt>CURRENT DRAW</dt><dd id="ro-draw">≈ 10 µA <span class="mini">(ILLUSTRATIVE, NOT MEASURED)</span></dd>
-        <dt>REFRESHES</dt><dd id="ro-count">0</dd>
-        <dt>EST. BATT LIFE</dt><dd id="ro-life">≈ 22.7 DAYS <span class="mini">@ 12 SYNC/DAY · ILLUSTRATIVE</span></dd>
-      </dl>
-    </div>
-
-    <div class="panel" id="panel-reader">
-      <div class="panel-head"><span>PN532 GATE READER</span><span class="sim-tag">SIMULATED</span></div>
+    <div class="panel simdev" id="panel-gate">
+      <div class="panel-head"><span>GATE NODE</span><span class="sim-tag">SIMULATED</span></div>
       <div class="reader" id="reader">
         <span class="reader-led" id="readerLed" aria-hidden="true"></span>
         <span class="reader-lcd" id="readerLcd">READY</span>
@@ -529,11 +556,25 @@ body.is-busy .panel.hot{opacity:1}
       <div class="btn-row">
         <button class="sbtn primary" id="btnTap" type="button">NFC TAP → READER</button>
       </div>
+      <hr class="gate-div">
+      <p class="mini diag-cap">DEVICE DIAGNOSTICS · VALUES ILLUSTRATIVE</p>
+      <dl class="readouts">
+        <dt>STATE</dt><dd id="ro-state">DEEP SLEEP</dd>
+        <dt>BATTERY</dt><dd id="ro-batt">87%</dd>
+        <dt>NETWORK</dt><dd id="ro-net">ONLINE</dd>
+        <dt>LAST REFRESH</dt><dd id="ro-last">--:--</dd>
+        <dt>CURRENT DRAW</dt><dd id="ro-draw">≈ 10 µA <span class="mini">(ILLUSTRATIVE, NOT MEASURED)</span></dd>
+        <dt>REFRESHES</dt><dd id="ro-count">0</dd>
+        <dt>EST. BATT LIFE</dt><dd id="ro-life">≈ 22.7 DAYS <span class="mini">@ 12 SYNC/DAY · ILLUSTRATIVE</span></dd>
+      </dl>
     </div>
 
-    <div class="panel" id="panel-detail">
-      <div class="panel-head"><span>COMPONENT DETAIL</span><span class="mini" id="detailTag">CLICK A PART</span></div>
-      <div class="detail" id="detail">
+    <div class="panel simdev" id="panel-detail">
+      <div class="panel-head">
+        <button class="fold" id="btnDetail" type="button" aria-expanded="false">COMPONENT DETAIL ▸</button>
+        <span class="mini" id="detailTag">CLICK A PART</span>
+      </div>
+      <div class="detail" id="detail" hidden>
         <p class="detail-empty">OPEN THE HARDWARE X-RAY FACE, THEN CLICK A COMPONENT FOR PURPOSE, VOLTAGE, INTERFACE, COST AND PIN MAP.</p>
       </div>
     </div>
@@ -548,7 +589,7 @@ body.is-busy .panel.hot{opacity:1}
   </aside>
   </div><!-- /bench -->
 
-  <section class="panel syswrap" id="syswrap">
+  <section class="panel syswrap simdev" id="syswrap">
     <div class="panel-head">
       <button class="fold" id="btnSys" type="button" aria-expanded="true">02 · SYSTEM VIEW ▾</button>
       <span class="sim-tag">READER · NETWORK · GATEWAY · BACKEND SIMULATED</span>
@@ -560,16 +601,17 @@ body.is-busy .panel.hot{opacity:1}
   </section>
 
   <section class="panel simwrap" id="simwrap">
-    <div class="panel-head"><span>03 · PROTOTYPE CONTROL · STATE MACHINE</span><span class="sim-tag">SIMULATED</span></div>
+    <div class="panel-head"><span>03 · SCENARIOS · STATE MACHINE</span><span class="sim-tag">SIMULATED</span></div>
     <p class="statusline" id="statusLine"></p>
+    <p class="mini state-cap">LIVE STATE — CLICK ANY NODE TO JUMP</p>
     <div class="state-strip" id="stateStrip" aria-label="Card state machine"></div>
     <div class="btn-row scenarios">
+      <button class="sbtn on" id="btnPresent" type="button">PRESENTER MODE</button>
       <button class="sbtn primary" id="btnSync" type="button">ADMIN SYNC</button>
       <button class="sbtn primary" id="btnScan" type="button">SCAN GATE CODE</button>
       <button class="sbtn" id="btnTamper" type="button">TAMPER</button>
       <button class="sbtn" id="btnOffline" type="button" aria-pressed="false">GO OFFLINE</button>
       <button class="sbtn" id="btnDeact" type="button" aria-pressed="false">DEACTIVATE CARD</button>
-      <button class="sbtn on" id="btnPresent" type="button">PRESENTER MODE</button>
     </div>
     <form class="admin-form" id="adminForm" hidden>
       <label>SEMESTER<input id="afSem" maxlength="4" value="6" autocomplete="off"></label>
@@ -593,7 +635,7 @@ body.is-busy .panel.hot{opacity:1}
   </section>
 
   <section class="panel logwrap" id="logwrap">
-    <div class="panel-head"><span>04 · EVENT LOG</span><span class="mini">LOCAL ONLY · SIMULATED</span></div>
+    <div class="panel-head"><span>04 · BUS MONITOR</span><span class="mini">LOCAL ONLY · SIMULATED</span></div>
     <div class="loglines" id="logPanel" role="log" aria-label="Event log"></div>
   </section>
 </main>
@@ -1320,6 +1362,13 @@ function selectComponent(id){
   $('#detail').innerHTML = html;
   $('#detailTag').textContent = p.status;
   log('SELECT PART: ' + p.name);
+  // fold-open the detail panel on first use
+  const det = $('#detail');
+  if (det.hidden){
+    det.hidden = false;
+    const bd = $('#btnDetail');
+    if (bd){ bd.setAttribute('aria-expanded', 'true'); bd.textContent = 'COMPONENT DETAIL ▾'; }
+  }
 }
 
 function buildSysview(){
@@ -1597,6 +1646,15 @@ function updateStatusLine(){
   el.innerHTML = seg.map((s) => '<span' + (s[1] ? ' class="bad"' : '') + '>' + s[0] + '</span>').join('<span class="mini">·</span>');
 }
 
+// markDemoStep(): the banner checklist ticks itself as scenarios run.
+function markDemoStep(key){
+  const li = document.querySelector('#demoList [data-demo="' + key + '"]');
+  if (li && !li.classList.contains('done')){
+    li.classList.add('done');
+    log('DEMO STEP COMPLETE: ' + key.toUpperCase());
+  }
+}
+
 /* ============================================================ SIM LOGIC */
 // runCycle(): WAKE → CHECK → RECEIVE → VERIFY → REFRESH E-INK → SAVE → SLEEP.
 // Offline: fails at CHECK, keeps the last image (E-Ink persistence).
@@ -1671,12 +1729,13 @@ async function adminSync(vals){
   log('SYNC CYCLE START');
   const ok = await runCycle();
   buttonFlash($('#btnSync'), ok ? 'SYNCED ✓' : 'OFFLINE · KEPT IMAGE', !ok);
+  markDemoStep('sync');
 }
 
 async function nfcTap(){
   if (sim.busy){ log('BUSY — TAP IGNORED', 1); return; }
   sim.busy = true;
-  setFocus(['panel-reader', 'logwrap']);
+  setFocus(['panel-gate', 'logwrap']);
   const mode = sim.nfcMode;
   log('NFC TAP · MODE: ' + mode);
   applyXrayMode('NFC');
@@ -1700,13 +1759,14 @@ async function nfcTap(){
   applyXrayMode(stateMachine.current);
   buttonFlash($('#btnTap'), sim.active ? 'VERIFIED ✓' : 'DENIED ✗', !sim.active);
   setFocus(null);
+  markDemoStep('tap');
   sim.busy = false;
 }
 
 async function scanGate(){
   if (sim.busy){ log('BUSY — SCAN IGNORED', 1); return; }
   sim.busy = true;
-  setFocus(['panel-reader', 'logwrap']);
+  setFocus(['panel-gate', 'logwrap']);
   log('GATE SCANNER: READING QR…');
   readerSet('amber', 'SCANNING…');
   await wait(REDUCED ? 80 : 900);
@@ -1727,6 +1787,7 @@ async function scanGate(){
   tokenTick();
   buttonFlash($('#btnScan'), bad ? msg.split(' ')[0] + ' ✗' : 'VERIFIED ✓', bad);
   setFocus(null);
+  markDemoStep('scan');
   sim.busy = false;
 }
 
@@ -1734,6 +1795,7 @@ function tamperToken(){
   sim.token.tamper = true;
   sim.token.sig = fnv(DEVICE_ID + '.EVIL.' + Math.floor(Date.now() / 1000));
   log('TOKEN TAMPERED — SIGNATURE BROKEN', 1);
+  markDemoStep('break');
   tokenTick();
 }
 
@@ -1744,8 +1806,12 @@ function setOnline(on){
   b.textContent = on ? 'GO OFFLINE' : 'BACK ONLINE';
   $('#ro-net').textContent = on ? 'ONLINE' : 'OFFLINE';
   $('#ro-net').classList.toggle('off', !on);
+  $('#nolink').classList.toggle('on', !on);
   log(on ? 'NETWORK: ONLINE' : 'NETWORK: OFFLINE — SYNC WILL FAIL GRACEFULLY', on ? 0 : 1);
-  if (!on) log('QR TOKEN FREEZES — WILL EXPIRE IN ≤ 30 s');
+  if (!on){
+    log('QR TOKEN FREEZES — WILL EXPIRE IN ≤ 30 s');
+    markDemoStep('break');
+  }
   updateStatusLine();
 }
 
@@ -1788,22 +1854,27 @@ function setActive(a){
 
 function presenterStop(msg){
   sim.presenting = false;
-  const btn = $('#btnPresent');
-  btn.textContent = 'PRESENTER MODE';
-  btn.classList.remove('on');
-  if (msg) log(msg);
+  const b1 = $('#btnPresent');
+  if (b1){ b1.textContent = 'PRESENTER MODE'; b1.classList.remove('on'); }
+  const b2 = $('#btnPresentHero');
+  if (b2){ b2.textContent = '▶ PRESENTER MODE'; b2.classList.remove('on'); }
+  if (msg) log(msg + (sim.busy ? ' — CURRENT STEP FINISHES FIRST' : ''));
 }
 
 // presenterRun(): walks the whole demo once, ~60 s, stoppable.
 async function presenterRun(){
   if (sim.presenting){ presenterStop('PRESENTER MODE STOPPED'); return; }
   sim.presenting = true;
-  const btn = $('#btnPresent');
-  btn.textContent = 'STOP PRESENTER';
-  btn.classList.add('on');
+  const b1 = $('#btnPresent');
+  if (b1){ b1.textContent = 'STOP PRESENTER'; }
+  const b2 = $('#btnPresentHero');
+  if (b2){ b2.textContent = '■ PRESENTER · STOP'; b2.classList.add('on'); }
   log('PRESENTER MODE START (~60 s)', 1);
   const alive = () => sim.presenting;
+  // between steps, wait out any in-flight scenario (e.g. after a stop+restart)
+  const busyWait = async () => { while (sim.busy && alive()){ await wait(250); } };
 
+  await busyWait();
   if (alive()){ log('PRESENTER 1/6: ADMIN SYNC'); await adminSync({ semester: '6', attendance: '95', examHall: 'H-210', seat: 'B-12' }); }
   await wait(500);
   if (!alive()) return presenterStop();
@@ -1816,6 +1887,7 @@ async function presenterRun(){
   }
   deselectComponent();
   await wait(400);
+  await busyWait();
   if (!alive()) return presenterStop();
 
   if (alive()){ log('PRESENTER 3/6: NFC TAP · ' + sim.nfcMode); await gotoFace('front'); await nfcTap(); }
@@ -1823,8 +1895,10 @@ async function presenterRun(){
   if (!alive()) return presenterStop();
 
   if (alive()){ log('PRESENTER 4/6: SCAN GATE CODE'); await scanGate(); }
+  await busyWait();
   if (alive()){ log('PRESENTER 5/6: TAMPER + RESCAN'); tamperToken(); await wait(400); await scanGate(); }
   await wait(300);
+  await busyWait();
   if (!alive()) return presenterStop();
 
   if (alive()){
@@ -1833,6 +1907,7 @@ async function presenterRun(){
     await wait(300);
     await adminSync();
   }
+  await busyWait();
   if (alive()){ setOnline(true); await wait(300); await adminSync(); }
   presenterStop('PRESENTER MODE COMPLETE');
 }
@@ -1868,6 +1943,14 @@ function bindSimEvents(){
   $('#btnOffline').addEventListener('click', () => setOnline(!sim.online));
   $('#btnDeact').addEventListener('click', () => setActive(!sim.active));
   $('#btnPresent').addEventListener('click', presenterRun);
+  $('#btnPresentHero').addEventListener('click', presenterRun);
+
+  $('#btnDetail').addEventListener('click', () => {
+    const d = $('#detail');
+    d.hidden = !d.hidden;
+    $('#btnDetail').setAttribute('aria-expanded', String(!d.hidden));
+    $('#btnDetail').textContent = 'COMPONENT DETAIL ' + (d.hidden ? '▸' : '▾');
+  });
 
   $('#btnBom').addEventListener('click', () => {
     const b = $('#bom');
@@ -1993,6 +2076,12 @@ function bindEvents(){
   window.setInterval(tokenTick, 1000);
   updateStatusLine();
   bindSimEvents();
+  // system view: open on laptop widths, folded by default on narrow screens
+  if (window.innerWidth < 1100){
+    $('#sysBody').hidden = true;
+    $('#btnSys').setAttribute('aria-expanded', 'false');
+    $('#btnSys').textContent = '02 · SYSTEM VIEW ▸';
+  }
   log('E-INK BADGE SIM BOOTED · ALL PARTS VIRTUAL');
   log('DEEP SLEEP · ONLY THE BATTERY PATH IS LIVE');
   if (!REDUCED) window.setTimeout(stampIn, 700);
