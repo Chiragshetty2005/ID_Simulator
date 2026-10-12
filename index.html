@@ -316,6 +316,18 @@ input[type=range]::-moz-range-thumb{width:10px;height:16px;background:var(--ink)
 .lowbatt{display:none;font-size:6.5px;font-weight:700;letter-spacing:.14em;color:var(--red)}
 .lowbatt.on{display:inline}
 
+/* ---- ux priority: focus mode, inline results, status line ---- */
+body.is-busy .panel{opacity:.35}
+body.is-busy .panel.hot{opacity:1}
+.sbtn.flashbad{background:var(--red);border-color:var(--red);color:var(--paper)}
+.statusline{display:flex;flex-wrap:wrap;gap:2px 10px;font-size:8px;font-weight:700;letter-spacing:.16em;margin:0 0 8px;padding-bottom:8px;border-bottom:1px solid var(--g2)}
+.statusline .bad{color:var(--red)}
+.state-node{cursor:pointer}
+.state-node:hover{background:var(--g1);color:var(--ink)}
+.state-node.active:hover{background:var(--ink);color:var(--paper)}
+.side-col #panel-bom{order:3}
+.side-col #panel-detail{order:4}
+
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation:none !important;transition:none !important}
   .stamp{opacity:1 !important;transform:rotate(-8deg) scale(1) !important}
@@ -489,7 +501,7 @@ input[type=range]::-moz-range-thumb{width:10px;height:16px;background:var(--ink)
   </div><!-- /card-col -->
 
   <aside class="side-col">
-    <div class="panel">
+    <div class="panel" id="panel-readout">
       <div class="panel-head"><span>LIVE READOUT</span><span class="sim-tag">SIMULATED</span></div>
       <dl class="readouts">
         <dt>STATE</dt><dd id="ro-state">DEEP SLEEP</dd>
@@ -502,7 +514,7 @@ input[type=range]::-moz-range-thumb{width:10px;height:16px;background:var(--ink)
       </dl>
     </div>
 
-    <div class="panel">
+    <div class="panel" id="panel-reader">
       <div class="panel-head"><span>PN532 GATE READER</span><span class="sim-tag">SIMULATED</span></div>
       <div class="reader" id="reader">
         <span class="reader-led" id="readerLed" aria-hidden="true"></span>
@@ -519,14 +531,14 @@ input[type=range]::-moz-range-thumb{width:10px;height:16px;background:var(--ink)
       </div>
     </div>
 
-    <div class="panel">
+    <div class="panel" id="panel-detail">
       <div class="panel-head"><span>COMPONENT DETAIL</span><span class="mini" id="detailTag">CLICK A PART</span></div>
       <div class="detail" id="detail">
         <p class="detail-empty">OPEN THE HARDWARE X-RAY FACE, THEN CLICK A COMPONENT FOR PURPOSE, VOLTAGE, INTERFACE, COST AND PIN MAP.</p>
       </div>
     </div>
 
-    <div class="panel">
+    <div class="panel" id="panel-bom">
       <div class="panel-head">
         <button class="fold" id="btnBom" type="button" aria-expanded="false">BILL OF MATERIALS ▸</button>
         <span class="sim-tag">SIMULATED</span>
@@ -536,7 +548,7 @@ input[type=range]::-moz-range-thumb{width:10px;height:16px;background:var(--ink)
   </aside>
   </div><!-- /bench -->
 
-  <section class="panel syswrap">
+  <section class="panel syswrap" id="syswrap">
     <div class="panel-head">
       <button class="fold" id="btnSys" type="button" aria-expanded="true">02 · SYSTEM VIEW ▾</button>
       <span class="sim-tag">READER · NETWORK · GATEWAY · BACKEND SIMULATED</span>
@@ -547,8 +559,9 @@ input[type=range]::-moz-range-thumb{width:10px;height:16px;background:var(--ink)
     </div>
   </section>
 
-  <section class="panel simwrap">
+  <section class="panel simwrap" id="simwrap">
     <div class="panel-head"><span>03 · PROTOTYPE CONTROL · STATE MACHINE</span><span class="sim-tag">SIMULATED</span></div>
+    <p class="statusline" id="statusLine"></p>
     <div class="state-strip" id="stateStrip" aria-label="Card state machine"></div>
     <div class="btn-row scenarios">
       <button class="sbtn primary" id="btnSync" type="button">ADMIN SYNC</button>
@@ -579,7 +592,7 @@ input[type=range]::-moz-range-thumb{width:10px;height:16px;background:var(--ink)
     </div>
   </section>
 
-  <section class="panel logwrap">
+  <section class="panel logwrap" id="logwrap">
     <div class="panel-head"><span>04 · EVENT LOG</span><span class="mini">LOCAL ONLY · SIMULATED</span></div>
     <div class="loglines" id="logPanel" role="log" aria-label="Event log"></div>
   </section>
@@ -925,7 +938,7 @@ const I2C_W = ['w-i2c-vcc', 'w-i2c-gnd', 'w-i2c-irq', 'w-i2c-scl', 'w-i2c-sda'];
 const hardwareConfig = {
   bom: [
     ['ESP32-S3 DEV BOARD', 700, 1000],
-    ['2.13" E-INK DISPLAY (SPI)', 1300, 1800],
+    ['3.7" E-INK DISPLAY (SPI)', 2500, 3000],
     ['PN532 NFC MODULE', 300, 500],
     ['LI-PO 3.7V 800 mAh (PROTECTED)', 250, 350],
     ['TP4056 + USB-C', 100, 300],
@@ -936,9 +949,9 @@ const hardwareConfig = {
     esp32:  { name: 'ESP32-S3 DEVKIT', sub: 'MAIN CONTROLLER',
       purpose: 'Runs the badge firmware — Wi-Fi/BLE sync with the gateway, drives the E-Ink panel over SPI and the PN532 over I2C, deep-sleeps between updates.',
       volt: '3.3 V', iface: 'WI-FI · BLE · SPI · I2C', cost: '₹700–1000', status: 'REAL IN FINAL BUILD' },
-    epd:    { name: '2.13" E-INK PANEL', sub: 'SPI · 250×122',
-      purpose: 'Bistable display — holds the card faces with zero power; only redraws on refresh.',
-      volt: '3.3 V', iface: 'SPI', cost: '₹1300–1800', status: 'REAL IN FINAL BUILD' },
+    epd:    { name: '3.7" E-INK PANEL', sub: 'SPI · 480×280',
+      purpose: 'Bistable display — holds the card faces with zero power; only redraws on refresh. Rotated 90° in firmware (setRotation(1)) so the badge renders portrait.',
+      volt: '3.3 V', iface: 'SPI', cost: '₹2500–3000', status: 'REAL IN FINAL BUILD' },
     nfc:    { name: 'PN532 NFC MODULE', sub: '13.56 MHz',
       purpose: 'Talks to gate readers and writes the passive tag; used for tap verification in attendance, library and campus modes.',
       volt: '3.3 V', iface: 'I2C (0x24) / SPI / HSU', cost: '₹300–500', status: 'REAL IN FINAL BUILD' },
@@ -1065,7 +1078,7 @@ const stateMachine = {
     CHECK:   { label: 'CHECK UPDATE', draw: '≈ 150 mA', ms: 1500 },
     RECEIVE: { label: 'RECEIVE',      draw: '≈ 150 mA', ms: 1700 },
     VERIFY: { label: 'VERIFY',       draw: '≈ 40 mA', ms: 800 },
-    REFRESH: { label: 'REFRESH E-INK', draw: '≈ 20 mA', ms: 2600 },
+    REFRESH: { label: 'REFRESH E-INK', draw: '≈ 20 mA', ms: 3000 },
     SAVE:    { label: 'SAVE',        draw: '≈ 40 mA', ms: 700 }
   },
   current: 'SLEEP',
@@ -1094,10 +1107,16 @@ function buildStrip(){
   const strip = $('#stateStrip');
   strip.innerHTML = '';
   stateMachine.order.forEach((id) => {
-    const n = document.createElement('span');
+    const n = document.createElement('button');
+    n.type = 'button';
     n.className = 'state-node';
     n.dataset.id = id;
     n.textContent = stateMachine.meta[id].label;
+    n.addEventListener('click', () => {
+      if (sim.busy){ log('BUSY — STATE JUMP IGNORED', 1); return; }
+      setCardState(id);
+      log('MANUAL STATE JUMP → ' + stateMachine.meta[id].label);
+    });
     strip.appendChild(n);
   });
 }
@@ -1153,7 +1172,7 @@ function buildXray(){
   mk('rect', { x: 4, y: 260, width: 14, height: 25, 'class': 'hit' }, usb);
 
   // component boxes
-  [['epd', '2.13" E-INK', 'SPI · 250×122'],
+  [['epd', '3.7" E-INK', 'SPI · 480×280'],
    ['esp32', 'ESP32-S3', 'DEVKIT · MAIN CTRL'],
    ['nfc', 'PN532', 'NFC · 13.56 MHZ'],
    ['tp4056', 'TP4056', 'CHARGER'],
@@ -1395,7 +1414,7 @@ function setCardState(id){
 
 /* ============================================================ SIM EINK */
 // refreshDisplay(): full panel rewrite — black, white, black, white,
-// then new content + stepped ghost fade. (~2 s; real panel swaps in later.)
+// then new content + stepped ghost fade. (~3 s matches the real 3.7" full refresh.)
 function refreshDisplay(applyFn){
   return new Promise((resolve) => {
     const f = $('#flash');
@@ -1407,19 +1426,19 @@ function refreshDisplay(applyFn){
       return;
     }
     f.className = 'flash ink';
-    window.setTimeout(() => { f.className = 'flash paper'; }, 300);
-    window.setTimeout(() => { f.className = 'flash ink'; }, 600);
+    window.setTimeout(() => { f.className = 'flash paper'; }, 450);
+    window.setTimeout(() => { f.className = 'flash ink'; }, 900);
     window.setTimeout(() => {
       if (applyFn) applyFn();          // swap during the last black frame
       f.className = 'flash paper';
-    }, 900);
+    }, 1350);
     window.setTimeout(() => {
       f.className = 'flash';
       ghostFade();
       countRefresh();
       stampIn();
       window.setTimeout(resolve, 800);
-    }, 1200);
+    }, 1800);
   });
 }
 
@@ -1529,6 +1548,7 @@ function makeToken(){
 
 function tokenTick(){
   const remain = 30 - Math.floor((Date.now() % 30000) / 1000);
+  sim.token.ttl = remain;
   if (sim.online && !sim.token.tamper) makeToken();
   const t = $('#tokenLbl'), u = $('#tokenTtl');
   if (!t) return;
@@ -1536,6 +1556,7 @@ function tokenTick(){
     (sim.token.tamper ? ' · TAMPERED' : '') +
     (!sim.active ? ' · CARD INACTIVE' : '');
   u.textContent = sim.online ? 'T-' + String(remain).padStart(2, '0') + 's' : 'OFFLINE · FROZEN';
+  updateStatusLine();
 }
 
 function readerSet(state, text){
@@ -1543,6 +1564,37 @@ function readerSet(state, text){
   led.className = 'reader-led' + (state ? ' ' + state : '');
   lcd.textContent = text;
   lcd.classList.toggle('bad', state === 'bad');
+}
+
+// buttonFlash(): inline result on the action button (~1.5 s).
+function buttonFlash(btn, text, bad){
+  if (!btn) return;
+  if (!btn.dataset.orig) btn.dataset.orig = btn.textContent;
+  btn.textContent = text;
+  btn.classList.toggle('flashbad', !!bad);
+  window.setTimeout(() => {
+    btn.textContent = btn.dataset.orig;
+    btn.classList.remove('flashbad');
+  }, 1500);
+}
+
+// setFocus(): while a scenario runs, everything but its panels dims out.
+function setFocus(hotIds){
+  document.body.classList.toggle('is-busy', !!hotIds && hotIds.length > 0);
+  $$('.panel').forEach((p) => p.classList.toggle('hot', !!hotIds && hotIds.indexOf(p.id) !== -1));
+}
+
+// updateStatusLine(): one glance — battery · network · token · card state.
+function updateStatusLine(){
+  const el = $('#statusLine');
+  if (!el) return;
+  const seg = [];
+  seg.push(['BAT ' + sim.battery + '%', sim.battery < 15]);
+  seg.push(['NET ' + (sim.online ? 'ONLINE' : 'OFFLINE'), !sim.online]);
+  seg.push([sim.token.tamper ? 'TOKEN TAMPERED' : 'TOKEN T-' + String(sim.token.ttl | 0).padStart(2, '0') + 's',
+            sim.token.tamper || !sim.online]);
+  seg.push(['CARD ' + (sim.active ? 'ACTIVE' : 'INACTIVE'), !sim.active]);
+  el.innerHTML = seg.map((s) => '<span' + (s[1] ? ' class="bad"' : '') + '>' + s[0] + '</span>').join('<span class="mini">·</span>');
 }
 
 /* ============================================================ SIM LOGIC */
@@ -1553,11 +1605,13 @@ function runCycle(applyChanges){
     if (stateMachine.running){ resolve(false); return; }
     stateMachine.running = true;
     sim.busy = true;
+    setFocus(['simwrap', 'syswrap', 'logwrap']);
     const finish = (synced) => {
       setCardState('SLEEP');
       log('ENTERING DEEP SLEEP');
       stateMachine.running = false;
       sim.busy = false;
+      setFocus(null);
       resolve(synced);
     };
     (async () => {
@@ -1615,12 +1669,14 @@ async function adminSync(vals){
       '% · HALL ' + studentData.examHall + ' · SEAT ' + studentData.seat);
   }
   log('SYNC CYCLE START');
-  await runCycle();
+  const ok = await runCycle();
+  buttonFlash($('#btnSync'), ok ? 'SYNCED ✓' : 'OFFLINE · KEPT IMAGE', !ok);
 }
 
 async function nfcTap(){
   if (sim.busy){ log('BUSY — TAP IGNORED', 1); return; }
   sim.busy = true;
+  setFocus(['panel-reader', 'logwrap']);
   const mode = sim.nfcMode;
   log('NFC TAP · MODE: ' + mode);
   applyXrayMode('NFC');
@@ -1642,12 +1698,15 @@ async function nfcTap(){
   readerSet('', 'READY');
   await doSlide({ x: 0, y: 0 });
   applyXrayMode(stateMachine.current);
+  buttonFlash($('#btnTap'), sim.active ? 'VERIFIED ✓' : 'DENIED ✗', !sim.active);
+  setFocus(null);
   sim.busy = false;
 }
 
 async function scanGate(){
   if (sim.busy){ log('BUSY — SCAN IGNORED', 1); return; }
   sim.busy = true;
+  setFocus(['panel-reader', 'logwrap']);
   log('GATE SCANNER: READING QR…');
   readerSet('amber', 'SCANNING…');
   await wait(REDUCED ? 80 : 900);
@@ -1666,6 +1725,8 @@ async function scanGate(){
   await wait(REDUCED ? 80 : 1000);
   readerSet('', 'READY');
   tokenTick();
+  buttonFlash($('#btnScan'), bad ? msg.split(' ')[0] + ' ✗' : 'VERIFIED ✓', bad);
+  setFocus(null);
   sim.busy = false;
 }
 
@@ -1685,6 +1746,7 @@ function setOnline(on){
   $('#ro-net').classList.toggle('off', !on);
   log(on ? 'NETWORK: ONLINE' : 'NETWORK: OFFLINE — SYNC WILL FAIL GRACEFULLY', on ? 0 : 1);
   if (!on) log('QR TOKEN FREEZES — WILL EXPIRE IN ≤ 30 s');
+  updateStatusLine();
 }
 
 function setBattery(p){
@@ -1698,6 +1760,7 @@ function setBattery(p){
   $('#lowbatt').classList.toggle('on', low);
   $('#ro-batt').classList.toggle('lowtext', low);
   updateLife();
+  updateStatusLine();
 }
 
 function updateLife(){
@@ -1720,6 +1783,7 @@ function setActive(a){
   log(a ? 'ADMIN: CARD REACTIVATED' : 'ADMIN: CARD DEACTIVATED', a ? 0 : 1);
   eInkRefresh(() => renderCard('front', studentData));
   tokenTick();
+  updateStatusLine();
 }
 
 function presenterStop(msg){
@@ -1927,6 +1991,7 @@ function bindEvents(){
   makeToken();
   tokenTick();
   window.setInterval(tokenTick, 1000);
+  updateStatusLine();
   bindSimEvents();
   log('E-INK BADGE SIM BOOTED · ALL PARTS VIRTUAL');
   log('DEEP SLEEP · ONLY THE BATTERY PATH IS LIVE');
