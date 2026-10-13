@@ -311,6 +311,9 @@ input[type=range]::-moz-range-thumb{width:10px;height:16px;background:var(--ink)
 .hw-mode{margin-top:4px;font-size:6.5px;font-weight:700;letter-spacing:.2em;color:var(--g3)}
 .hw-mode.hot{color:var(--red)}
 
+.panel-tag{margin-top:6px;font-size:6px;font-weight:500;letter-spacing:.24em;color:var(--g2);text-align:center;border-top:1px solid var(--g2);padding-top:6px}
+.card.inv .panel-tag{color:var(--g2)}
+
 /* stamp / battery states */
 .stamp.off{color:var(--g3);border-color:var(--g3);background:repeating-linear-gradient(45deg,var(--g1) 0 2px,transparent 2px 5px)}
 .lowbatt{display:none;font-size:6.5px;font-weight:700;letter-spacing:.14em;color:var(--red)}
@@ -440,6 +443,7 @@ body.is-busy .panel.hot{opacity:1}
             <div class="scanline" aria-hidden="true"></div>
             <div class="bar-meta" aria-hidden="true"><span>ID-CODE · 39</span><span>SCAN AT GATE</span></div>
           </div>
+          <p class="panel-tag" aria-hidden="true">PANEL: 3.7" E-INK · 480×280 · BISTABLE</p>
         </section>
 
         <!-- ================= BACK ================= -->
@@ -544,7 +548,7 @@ body.is-busy .panel.hot{opacity:1}
     <button class="ctrl" id="btnHardware" type="button" aria-label="Show the hardware x-ray face">HARDWARE</button>
   </div>
   <p class="hint">E-INK BADGE · DSU REV 2.4<br>CLICK CARD OR SPACE / ENTER — CYCLE FACES · X-RAY: CLICK A PART</p>
-  <p class="plate">DSU SMART BADGE · REV 2.4 · UNIT UNDER TEST</p>
+  <p class="plate">DSU E-INK BADGE · REV 2.4 · UNIT UNDER TEST · PANEL 3.7" E-INK</p>
   </div><!-- /card-col -->
 
   <aside class="side-col">
@@ -1021,7 +1025,7 @@ const hardwareConfig = {
       purpose: 'Runs the badge firmware — Wi-Fi/BLE sync with the gateway, drives the E-Ink panel over SPI and the PN532 over I2C, deep-sleeps between updates.',
       volt: '3.3 V', iface: 'WI-FI · BLE · SPI · I2C', cost: '₹700–1000', status: 'REAL IN FINAL BUILD' },
     epd:    { name: '3.7" E-INK PANEL', sub: 'SPI · 480×280',
-      purpose: 'Bistable display — holds the card faces with zero power; only redraws on refresh. Rotated 90° in firmware (setRotation(1)) so the badge renders portrait.',
+      purpose: 'Bistable display — holds the card faces with zero power; only redraws on refresh. Rotated 90° in firmware (setRotation(1)) so the badge renders portrait. The panel covers the whole card front: everything you see on the card IS this E-Ink.',
       volt: '3.3 V', iface: 'SPI', cost: '₹2500–3000', status: 'REAL IN FINAL BUILD' },
     nfc:    { name: 'PN532 NFC MODULE', sub: '13.56 MHz',
       purpose: 'Talks to gate readers and writes the passive tag; used for tap verification in attendance, library and campus modes.',
